@@ -17,11 +17,11 @@ const NAV = [
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body className="bg-[#0f1117] text-slate-200 min-h-screen font-sans antialiased">
+      <body className="bg-[#0f1117] text-slate-200 min-h-screen font-pretendard antialiased">
         {/* 네비게이션 */}
         <header className="sticky top-0 z-50 border-b border-white/8 bg-[#0f1117]/90 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-6 h-14 flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-emerald-400">
+            <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-mint-400">
               <Cpu size={16} />
               Mintlab
             </Link>

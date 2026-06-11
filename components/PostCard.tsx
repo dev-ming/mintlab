@@ -3,7 +3,7 @@ import type { PostMeta } from '@/lib/content'
 import { Code2, BookOpen, Wrench, Layers } from 'lucide-react'
 
 const CATEGORY_CONFIG = {
-  guide: { label: '가이드', icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
+  guide: { label: '가이드', icon: BookOpen, color: 'text-mint-400', bg: 'bg-mint-400/10 border-mint-400/20' },
   tool: { label: '도구', icon: Wrench, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
   prompt: { label: '프롬프트', icon: Code2, color: 'text-purple-400', bg: 'bg-purple-400/10 border-purple-400/20' },
   showcase: { label: '결과물', icon: Layers, color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
@@ -28,7 +28,7 @@ export default function PostCard({ post, featured = false }: Props) {
             </span>
             <time className="text-xs text-slate-500">{post.date}</time>
           </div>
-          <h2 className="text-xl font-bold text-slate-100 mb-2 group-hover:text-emerald-400 transition-colors">
+          <h2 className="text-xl font-bold text-slate-100 mb-2 group-hover:text-mint-400 transition-colors">
             {post.title}
           </h2>
           <p className="text-slate-400 text-sm leading-relaxed mb-4">{post.excerpt}</p>
@@ -52,7 +52,7 @@ export default function PostCard({ post, featured = false }: Props) {
           <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
           <time className="text-xs text-slate-600 ml-auto">{post.date}</time>
         </div>
-        <h3 className="text-sm font-semibold text-slate-200 mb-1.5 group-hover:text-emerald-400 transition-colors line-clamp-2">
+        <h3 className="text-sm font-semibold text-slate-200 mb-1.5 group-hover:text-mint-400 transition-colors line-clamp-2">
           {post.title}
         </h3>
         <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{post.excerpt}</p>

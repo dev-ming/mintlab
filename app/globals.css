@@ -1,14 +1,16 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* 코드 블록 기본 스타일 */
 .prose pre {
-  @apply bg-[#0a0d14] border border-white/8 rounded-xl;
+  @apply bg-[#0a0d14] border border-white/[8%] rounded-xl;
 }
 
 .prose code:not(pre code) {
-  @apply bg-white/8 text-emerald-300 px-1.5 py-0.5 rounded text-[0.85em];
+  @apply bg-white/[8%] text-mint-300 px-1.5 py-0.5 rounded text-[0.85em];
   font-weight: 400;
 }
 
@@ -17,14 +19,28 @@
   content: '';
 }
 
+/* 테이블 스타일 */
+.prose table {
+  @apply w-full text-sm;
+}
+.prose thead th {
+  @apply text-slate-300 font-semibold bg-white/5 border-b border-white/10 px-3 py-2 text-left;
+}
+.prose tbody td {
+  @apply text-slate-400 border-b border-white/5 px-3 py-2;
+}
+.prose tbody tr:hover td {
+  @apply bg-white/[3%];
+}
+
 /* prose 색상 오버라이드 */
 .prose {
   --tw-prose-body: theme(colors.slate.300);
   --tw-prose-headings: theme(colors.slate.100);
-  --tw-prose-links: theme(colors.emerald.400);
+  --tw-prose-links: theme(colors.mint.400);
   --tw-prose-bold: theme(colors.slate.100);
   --tw-prose-quotes: theme(colors.slate.400);
-  --tw-prose-quote-borders: theme(colors.emerald.500);
+  --tw-prose-quote-borders: theme(colors.mint.500);
   --tw-prose-hr: rgba(255,255,255,0.08);
   --tw-prose-th-borders: rgba(255,255,255,0.12);
   --tw-prose-td-borders: rgba(255,255,255,0.08);

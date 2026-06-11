@@ -3,6 +3,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { notFound } from 'next/navigation'
 import EmbedViewer from '@/components/EmbedViewer'
 import rehypePrettyCode from 'rehype-pretty-code'
+import remarkGfm from 'remark-gfm'
 import type { Metadata } from 'next'
 
 // MDX에서 쓸 수 있는 커스텀 컴포넌트
@@ -12,6 +13,7 @@ const components = {
 
 const mdxOptions = {
   mdxOptions: {
+    remarkPlugins: [remarkGfm],
     rehypePlugins: [
       [rehypePrettyCode, { theme: 'github-dark-dimmed', keepBackground: false }],
     ],
@@ -50,7 +52,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
       {/* 헤더 */}
       <header className="mb-10 pb-8 border-b border-white/8">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-mint-400/10 text-mint-400 border border-mint-400/20">
             {CATEGORY_LABEL[meta.category] ?? meta.category}
           </span>
           <time className="text-xs text-slate-500">{meta.date}</time>

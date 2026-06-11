@@ -31,7 +31,7 @@ export default function TagFilter({ tags, activeTag }: Props) {
           onClick={() => handleTag(tag)}
           className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
             activeTag === tag
-              ? 'bg-emerald-400/15 border-emerald-400/40 text-emerald-400'
+              ? 'bg-mint-400/15 border-mint-400/40 text-mint-400'
               : 'border-white/8 text-slate-500 hover:text-slate-300 hover:border-white/15'
           }`}
         >

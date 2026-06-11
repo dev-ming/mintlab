@@ -46,7 +46,7 @@ export default function PostsPage({
               href={cat ? `/posts?category=${cat}` : '/posts'}
               className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                 active
-                  ? 'bg-emerald-400/10 border-emerald-400/30 text-emerald-400'
+                  ? 'bg-mint-400/10 border-mint-400/30 text-mint-400'
                   : 'border-white/8 text-slate-400 hover:text-slate-200 hover:border-white/15'
               }`}
             >
