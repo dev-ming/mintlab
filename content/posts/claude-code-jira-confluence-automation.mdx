@@ -1,0 +1,386 @@
+---
+title: "Claude Code로 Jira 상태 변경 시 Confluence 업무일지 자동 업데이트하기"
+date: "2026-06-10"
+tags: ["claude-code", "jira", "confluence", "atlassian", "mcp", "automation", "hook"]
+category: "guide"
+excerpt: "Jira 티켓 완료 처리 한 마디면 Confluence 업무일지까지 자동 업데이트 — Claude Code PostToolUse 훅으로 반복 작업을 완전히 없앤 실전 자동화"
+---
+
+## 배경
+
+개발자라면 누구나 공감할 것이다. 일감을 하나 완료할 때마다 거쳐야 하는 루틴이 있다.
+
+1. Jira에서 티켓 상태 변경
+2. 구현 내용 댓글 작성
+3. 팀 공유 업무일지(Confluence)에 이슈 링크 추가
+
+각각은 30초짜리 작업이지만, 하루에 여러 번 반복하다 보면 은근히 신경 쓰인다. 더 큰 문제는 **까먹는다**는 것이다. 코드에 집중하다가 Jira 상태 바꾸는 것도 잊고, 업무일지 업데이트는 퇴근 직전에야 생각난다.
+
+나는 이 반복 작업을 **Claude Code의 훅(Hook) 시스템**으로 완전히 자동화했다. Claude에게 "이 일감 진행 중으로 바꿔줘"라고 말하는 순간, Confluence 업무일지까지 자동으로 업데이트된다.
+
+---
+
+## 결과 먼저 보기
+
+아래처럼 Claude에게 말하면:
+
+```
+NFT-3710 완료 처리해줘
+```
+
+Claude가 Jira 상태를 전환하는 순간, 백그라운드에서 자동으로:
+
+- Confluence 주간 업무일지의 **오늘 날짜 셀**에 이슈 링크가 추가된다
+- 아무것도 따로 입력하지 않아도 된다
+
+---
+
+## 전체 아키텍처
+
+```
+사용자 → Claude Code
+            │
+            ├─ Atlassian MCP ──→ Jira 상태 전환
+            │                     (transitionJiraIssue)
+            │
+            └─ PostToolUse 훅 발동
+                    │
+                    ▼
+            update-confluence.mjs
+                    │
+                    ├─ 이번 주 Confluence 페이지 조회
+                    ├─ 오늘 요일 + 담당자 셀 위치 계산
+                    └─ Jira 링크 삽입 후 PUT 업데이트
+```
+
+핵심은 **Claude Code의 PostToolUse 훅**이다. 특정 MCP 도구가 실행된 직후 지정한 쉘 커맨드를 자동 실행할 수 있다. Jira 전환 도구(`transitionJiraIssue`)가 호출될 때마다 내 스크립트가 실행되는 것이다.
+
+---
+
+## 사용 기술
+
+| 구성 요소 | 설명 |
+|---|---|
+| **Claude Code** | CLI 기반 AI 코딩 도구 (Anthropic) |
+| **Atlassian MCP** | Jira/Confluence를 Claude가 직접 조작하게 해주는 MCP 서버 |
+| **PostToolUse 훅** | Claude Code의 이벤트 훅 시스템 |
+| **Node.js 스크립트** | Confluence REST API 호출 및 Storage XML 파싱 |
+| **Confluence REST API** | `body.storage` 포맷으로 페이지 읽기/쓰기 |
+
+---
+
+## 설정 방법
+
+### 1단계: Atlassian API 토큰 발급
+
+Confluence REST API를 직접 호출하려면 API 토큰이 필요하다.
+
+1. `https://id.atlassian.com/manage-profile/security/api-tokens` 접속
+2. **Create API token** 클릭
+3. 이름 입력 후 생성 → 토큰 복사
+
+토큰을 `~/.claude/.env` 파일에 저장한다:
+
+```bash
+# ~/.claude/.env
+CONFLUENCE_API_TOKEN=여기에_발급받은_토큰_붙여넣기
+```
+
+> 이 파일은 Claude Code의 파일 읽기 권한에서 제외되어 있어 안전하다.
+
+---
+
+### 2단계: 자동화 스크립트 작성
+
+`~/.claude/scripts/update-confluence.mjs` 파일을 생성한다.
+
+```javascript
+// ~/.claude/scripts/update-confluence.mjs
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+
+// ── 설정 ──────────────────────────────────────
+const EMAIL       = '본인_이메일@회사.com';
+const BASE_HOST   = '회사명.atlassian.net';
+const SPACE_KEY   = 'Confluence_스페이스_키';
+const TARGET_NAME = '본인_이름';  // 업무일지 표에서 본인 행 이름
+const JIRA_BASE   = 'https://회사명.atlassian.net/browse';
+const DAYS_KO     = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+
+// ── 토큰 로드 ─────────────────────────────────
+function loadToken() {
+    if (process.env.CONFLUENCE_API_TOKEN) return process.env.CONFLUENCE_API_TOKEN;
+    const envPath = path.join(os.homedir(), '.claude', '.env');
+    if (fs.existsSync(envPath)) {
+        const env = fs.readFileSync(envPath, 'utf8').split('\n').reduce((acc, l) => {
+            const [k, ...v] = l.split('=');
+            if (k && !k.startsWith('#')) acc[k.trim()] = v.join('=').trim();
+            return acc;
+        }, {});
+        if (env.CONFLUENCE_API_TOKEN) return env.CONFLUENCE_API_TOKEN;
+    }
+    return null;
+}
+
+const TOKEN = loadToken();
+if (!TOKEN) { console.error('❌ CONFLUENCE_API_TOKEN 없음'); process.exit(0); }
+const AUTH = Buffer.from(`${EMAIL}:${TOKEN}`).toString('base64');
+
+// ── stdin에서 이슈 키 파싱 ────────────────────
+// PostToolUse 훅으로 실행될 때 Claude가 stdin으로 도구 입력값을 전달한다
+async function parseArgs() {
+    const args = process.argv.slice(2);
+    let issueKeys = args.filter(a => !a.startsWith('--'));
+
+    if (!issueKeys.length) {
+        const stdin = await readStdin();
+        if (stdin.trim()) {
+            try {
+                const data = JSON.parse(stdin);
+                const key = data?.tool_input?.issueIdOrKey
+                    || data?.issueIdOrKey
+                    || data?.input?.issueIdOrKey;
+                if (key) issueKeys = [key];
+            } catch {}
+        }
+    }
+
+    return { issueKeys, todayKo: DAYS_KO[new Date().getDay()] };
+}
+
+function readStdin() {
+    return new Promise(resolve => {
+        let data = '';
+        process.stdin.setEncoding('utf8');
+        process.stdin.on('data', d => data += d);
+        process.stdin.on('end', () => resolve(data));
+        setTimeout(() => resolve(data), 3000);
+    });
+}
+
+// ── HTTP 요청 헬퍼 ────────────────────────────
+function request(method, apiPath, body) {
+    return new Promise((resolve, reject) => {
+        const bodyStr = body ? JSON.stringify(body) : undefined;
+        const req = https.request({
+            hostname: BASE_HOST, path: apiPath, method,
+            headers: {
+                'Authorization': `Basic ${AUTH}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...(bodyStr ? { 'Content-Length': Buffer.byteLength(bodyStr) } : {}),
+            },
+        }, res => {
+            let data = '';
+            res.on('data', d => data += d);
+            res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(data); } });
+        });
+        req.on('error', reject);
+        if (bodyStr) req.write(bodyStr);
+        req.end();
+    });
+}
+
+// ── 이번 주 페이지 찾기 ───────────────────────
+function getMondayDate() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return d.toISOString().slice(0, 10);
+}
+
+async function findWeeklyPage() {
+    const monday = getMondayDate();
+    const title = encodeURIComponent(`[백엔드] ${monday}`);
+    const result = await request('GET',
+        `/wiki/rest/api/content?spaceKey=${SPACE_KEY}&title=${title}&expand=version,body.storage`
+    );
+    const page = result?.results?.[0];
+    if (!page) throw new Error(`페이지 없음: [백엔드] ${monday}`);
+    return page;
+}
+
+// ── 셀 위치 찾아서 링크 삽입 ─────────────────
+function insertIntoCell(xml, dayName, personName, newContent) {
+    const dayIdx = xml.indexOf(`<ac:parameter ac:name="title">${dayName}</ac:parameter>`);
+    if (dayIdx < 0) return null;
+    const afterDay = xml.slice(dayIdx);
+
+    const personIdx = afterDay.indexOf(`<ac:parameter ac:name="title">${personName}</ac:parameter>`);
+    if (personIdx < 0) return null;
+    const afterPerson = afterDay.slice(personIdx);
+
+    const closeTd = afterPerson.indexOf('</td>');
+    if (closeTd < 0) return null;
+    const afterNameCell = afterPerson.slice(closeTd + 5);
+
+    const nextTd = afterNameCell.indexOf('<td');
+    if (nextTd < 0) return null;
+    const issuesCellContent = afterNameCell.slice(nextTd);
+    const closingTd = issuesCellContent.indexOf('</td>');
+    if (closingTd < 0) return null;
+
+    const insertPos = dayIdx + personIdx + closeTd + 5 + nextTd + closingTd;
+    return xml.slice(0, insertPos) + newContent + xml.slice(insertPos);
+}
+
+// ── 메인 ─────────────────────────────────────
+async function main() {
+    const { issueKeys, todayKo } = await parseArgs();
+    if (!issueKeys.length) { console.log('이슈 키 없음'); return; }
+
+    const page = await findWeeklyPage();
+    const storageXml = page.body.storage.value;
+    const version = page.version.number;
+
+    const newLinksXml = issueKeys
+        .map(key => `<p><a href="${JIRA_BASE}/${key}" data-card-appearance="inline">${JIRA_BASE}/${key}</a></p>`)
+        .join('');
+
+    const modifiedXml = insertIntoCell(storageXml, todayKo, TARGET_NAME, newLinksXml);
+    if (!modifiedXml) { console.error('셀 위치 찾기 실패'); process.exit(0); }
+
+    const result = await request('PUT', `/wiki/rest/api/content/${page.id}`, {
+        version: { number: version + 1 },
+        title: page.title,
+        type: 'page',
+        body: { storage: { value: modifiedXml, representation: 'storage' } },
+    });
+
+    if (result.id) console.log(`✅ ${todayKo} ${TARGET_NAME} 셀에 ${issueKeys.join(', ')} 추가됨`);
+    else console.error('❌ 업데이트 실패:', result);
+}
+
+main().catch(err => { console.error('오류:', err.message); process.exit(0); });
+```
+
+---
+
+### 3단계: Claude Code 훅 설정
+
+`~/.claude/settings.json`에 PostToolUse 훅을 추가한다.
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__claude_ai_Atlassian__transitionJiraIssue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/본인계정/.claude/scripts/update-confluence.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+> 훅 설정 변경 후에는 **Claude Code를 재시작**해야 적용된다.
+
+---
+
+## 핵심 동작 원리
+
+### PostToolUse 훅이란?
+
+Claude Code는 도구(Tool)를 실행하기 전후로 사용자가 지정한 쉘 커맨드를 실행할 수 있다. `PostToolUse`는 도구 실행 **이후**에 발동하며, 도구의 입력값이 **stdin으로 JSON 형태로 전달**된다.
+
+```json
+{
+  "tool_name": "mcp__claude_ai_Atlassian__transitionJiraIssue",
+  "tool_input": {
+    "issueIdOrKey": "NFT-3710",
+    "transitionId": "31"
+  }
+}
+```
+
+스크립트는 이 JSON을 파싱해 이슈 키를 추출하고 Confluence 업데이트에 사용한다.
+
+---
+
+### Confluence Storage XML 파싱
+
+Confluence 페이지를 REST API로 읽을 때 `body.storage` 포맷을 사용하면 내부 XML 구조 그대로 가져올 수 있다. ADF 포맷 대신 이 방식을 쓰는 이유는 **표의 열 너비 등 서식이 초기화되는 문제** 때문이다.
+
+탐색 순서:
+
+1. XML에서 오늘 요일(`수요일`) Status Macro 위치 탐색
+2. 그 이후 구간에서 담당자 이름 Status Macro 위치 탐색
+3. 이름 셀 `</td>` 이후 → 다음 `<td>` (이슈 셀) 탐색
+4. 이슈 셀의 `</td>` 직전에 새 링크 삽입
+5. 수정된 XML을 PUT으로 업데이트
+
+---
+
+### 수동 실행도 지원
+
+```bash
+# 이슈 직접 지정
+node ~/.claude/scripts/update-confluence.mjs NFT-3710 NFT-3714
+
+# 요일 지정 (과거 날짜 보완용)
+node ~/.claude/scripts/update-confluence.mjs --day 월요일 NFT-3647
+
+# 실제 반영 전 위치 확인 (dry run)
+node ~/.claude/scripts/update-confluence.mjs --dry-run NFT-3710
+```
+
+---
+
+## 트러블슈팅
+
+### ADF 포맷이 표 서식을 망가뜨림
+
+MCP의 `updateConfluencePage` 도구는 ADF 형식으로 업데이트하는데, 이 경우 기존 표의 열 너비 설정이 초기화된다. **해결책:** MCP 대신 Confluence REST API를 `body.storage` 포맷으로 직접 호출해 원본 XML을 그대로 읽어서 최소한의 수정만 하고 돌려보낸다.
+
+### `<ac:link>` 태그로 외부 URL이 빈 줄로 렌더링
+
+`<ac:link>` 매크로는 **내부 Confluence 페이지 링크** 전용이다. 외부 URL에는 일반 `<a>` 태그를 사용해야 한다.
+
+```xml
+<!-- ❌ 잘못된 방식 -->
+<p><ac:link><ri:url ri:value="https://..." /></ac:link></p>
+
+<!-- ✅ 올바른 방식 -->
+<p><a href="https://..." data-card-appearance="inline">https://...</a></p>
+```
+
+### 훅이 발동하지 않음
+
+`settings.json` 수정 후 Claude Code를 재시작하지 않으면 적용되지 않는다. 설정 파일은 프로세스 시작 시 한 번만 읽힌다.
+
+---
+
+## 전체 사용 흐름
+
+```
+나: NFT-3710 완료 처리해줘
+
+Claude: [transitionJiraIssue 호출]
+        → PostToolUse 훅 발동
+        → update-confluence.mjs 실행
+        → [백엔드] 2026-06-08 페이지 조회
+        → 수요일 담당자 셀에 NFT-3710 링크 삽입
+        → PUT 업데이트
+        ✅ 완료됐습니다.
+```
+
+---
+
+## 정리
+
+| 항목 | 자동화 전 | 자동화 후 |
+|---|---|---|
+| Jira 상태 변경 | 직접 웹에서 클릭 | Claude에게 말하면 끝 |
+| 업무일지 업데이트 | 수동 접속 → 셀 찾아서 링크 추가 | 자동 (훅이 처리) |
+| 까먹을 위험 | 있음 | 없음 (Jira 전환과 동시에 실행) |
+| 설정 범위 | — | 글로벌 (`~/.claude/`) — 모든 프로젝트에서 동작 |
+
+Claude Code의 훅 시스템은 단순히 AI와 대화하는 것을 넘어, **AI 작업을 트리거로 외부 시스템을 자동화**하는 강력한 도구다. 비슷한 패턴으로 Slack 알림, 배포 트리거, 문서 자동 생성 등 다양한 자동화에 응용할 수 있다.
