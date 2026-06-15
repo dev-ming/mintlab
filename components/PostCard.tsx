@@ -27,7 +27,7 @@ export default function PostCard({ post, featured = false }: Props) {
               {cfg.label}
             </span>
             <time className="text-xs text-slate-500">{post.date}</time>
-            <span className="text-xs text-slate-600 flex items-center gap-1 ml-auto">
+            <span className="text-xs text-slate-400 flex items-center gap-1 ml-auto">
               <Clock size={10} />
               {post.readingTime}분
             </span>
@@ -54,8 +54,8 @@ export default function PostCard({ post, featured = false }: Props) {
         <div className="flex items-center gap-2 mb-2">
           <Icon size={12} className={cfg.color} />
           <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
-          <time className="text-xs text-slate-600 ml-auto">{post.date}</time>
-          <span className="text-xs text-slate-600 flex items-center gap-0.5">
+          <time className="text-xs text-slate-400 ml-auto">{post.date}</time>
+          <span className="text-xs text-slate-400 flex items-center gap-0.5">
             <Clock size={10} />
             {post.readingTime}분
           </span>

@@ -3,28 +3,26 @@ import { useState, useEffect } from 'react'
 import type { Heading } from '@/lib/content'
 
 export default function TableOfContents({ headings }: { headings: Heading[] }) {
-  const [active, setActive] = useState('')
+  const [active, setActive] = useState(headings[0]?.id ?? '')
 
   useEffect(() => {
     if (headings.length === 0) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // 가장 위쪽에 있는 intersecting heading을 active로
-        const visible = entries.filter((e) => e.isIntersecting)
-        if (visible.length > 0) {
-          setActive(visible[0].target.id)
+    const handleScroll = () => {
+      const offset = 120 // sticky 헤더 높이 + 여유
+      let current = headings[0]?.id ?? ''
+      for (const h of headings) {
+        const el = document.getElementById(h.id)
+        if (el && el.getBoundingClientRect().top <= offset) {
+          current = h.id
         }
-      },
-      { rootMargin: '0px 0px -60% 0px', threshold: 0 },
-    )
+      }
+      setActive(current)
+    }
 
-    headings.forEach((h) => {
-      const el = document.getElementById(h.id)
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [headings])
 
   if (headings.length === 0) return null

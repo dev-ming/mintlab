@@ -67,7 +67,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
               {CATEGORY_LABEL[meta.category] ?? meta.category}
             </span>
             <time className="text-xs text-slate-500">{meta.date}</time>
-            <span className="text-xs text-slate-600 ml-auto">{meta.readingTime}분 읽기</span>
+            <span className="text-xs text-slate-400 ml-auto">{meta.readingTime}분 읽기</span>
           </div>
           <h1 className="text-3xl font-bold text-slate-100 leading-tight mb-4">{meta.title}</h1>
           <p className="text-slate-400 text-base">{meta.excerpt}</p>
