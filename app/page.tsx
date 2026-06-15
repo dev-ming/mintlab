@@ -65,7 +65,7 @@ export default function HomePage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">AI</h2>
-            <Link href="/posts?category=ai" className="text-xs text-mint-400 flex items-center gap-1 hover:underline">
+            <Link href="/ai" className="text-xs text-mint-400 flex items-center gap-1 hover:underline">
               더 보기 <ArrowRight size={12} />
             </Link>
           </div>

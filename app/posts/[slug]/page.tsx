@@ -39,7 +39,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   ai: 'AI',
   review: '리뷰',
   log: '로그',
-  essay: '에세이',
 }
 
 export default function PostPage({ params }: { params: { slug: string } }) {

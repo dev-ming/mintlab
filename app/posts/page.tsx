@@ -24,7 +24,6 @@ export default function PostsPage({
     ai: 'AI',
     review: '리뷰',
     log: '로그',
-    essay: '에세이',
   }
 
   return (
@@ -38,7 +37,7 @@ export default function PostsPage({
 
       {/* 카테고리 탭 */}
       <div className="flex gap-2 flex-wrap mb-6">
-        {(['', 'guide', 'ai', 'review', 'log', 'essay'] as const).map((cat) => {
+        {(['', 'guide', 'ai', 'review', 'log'] as const).map((cat) => {
           const label = cat === '' ? '전체' : CATEGORY_LABELS[cat]
           const active = (searchParams.category ?? '') === cat
           return (

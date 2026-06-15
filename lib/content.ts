@@ -9,7 +9,7 @@ export type PostMeta = {
   title: string
   date: string
   tags: string[]
-  category: 'guide' | 'ai' | 'review' | 'log' | 'essay'
+  category: 'guide' | 'ai' | 'review' | 'log'
   subcategory?: AiSubcategory
   excerpt: string
   embedUrl?: string
