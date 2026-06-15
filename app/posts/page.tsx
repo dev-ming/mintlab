@@ -3,7 +3,7 @@ import PostCard from '@/components/PostCard'
 import TagFilter from '@/components/TagFilter'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: '가이드' }
+export const metadata: Metadata = { title: '전체 글' }
 
 export default function PostsPage({
   searchParams,
@@ -21,9 +21,10 @@ export default function PostsPage({
 
   const CATEGORY_LABELS: Record<string, string> = {
     guide: '가이드',
-    tool: '도구 리뷰',
-    prompt: '프롬프트',
-    showcase: '결과물',
+    ai: 'AI',
+    review: '리뷰',
+    log: '로그',
+    essay: '에세이',
   }
 
   return (
@@ -37,7 +38,7 @@ export default function PostsPage({
 
       {/* 카테고리 탭 */}
       <div className="flex gap-2 flex-wrap mb-6">
-        {(['', 'guide', 'tool', 'prompt', 'showcase'] as const).map((cat) => {
+        {(['', 'guide', 'ai', 'review', 'log', 'essay'] as const).map((cat) => {
           const label = cat === '' ? '전체' : CATEGORY_LABELS[cat]
           const active = (searchParams.category ?? '') === cat
           return (

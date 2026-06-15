@@ -36,9 +36,10 @@ export async function generateMetadata({
 
 const CATEGORY_LABEL: Record<string, string> = {
   guide: '가이드',
-  tool: '도구 리뷰',
-  prompt: '프롬프트',
-  showcase: '결과물',
+  ai: 'AI',
+  review: '리뷰',
+  log: '로그',
+  essay: '에세이',
 }
 
 export default function PostPage({ params }: { params: { slug: string } }) {

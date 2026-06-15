@@ -5,13 +5,13 @@ import { Cpu } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: { default: 'Mintlab', template: '%s | Mintlab' },
-  description: 'AI 워크플로우, 도구 리뷰, 프롬프트 템플릿 — Mintlab',
+  description: '개발 경험, AI 활용, 도구 리뷰 — Mintlab',
 }
 
 const NAV = [
-  { href: '/posts', label: '가이드' },
-  { href: '/tools', label: '도구 리뷰' },
-  { href: '/prompts', label: '프롬프트' },
+  { href: '/posts', label: '전체' },
+  { href: '/reviews', label: '리뷰' },
+  { href: '/logs', label: '로그' },
 ]
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <footer className="border-t border-white/8 mt-20">
           <div className="max-w-4xl mx-auto px-6 py-8 text-xs text-slate-600 flex items-center justify-between">
-            <span>Mintlab — 직접 만들고 기록하는 AI 워크플로우 아카이브</span>
+            <span>Mintlab — 개발 경험과 생각을 기록하는 공간</span>
             <a
               href="https://github.com/dev-ming"
               target="_blank"

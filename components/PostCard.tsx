@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import type { PostMeta } from '@/lib/content'
-import { Code2, BookOpen, Wrench, Layers } from 'lucide-react'
+import { BookOpen, Cpu, Star, FileText, Feather } from 'lucide-react'
 
 const CATEGORY_CONFIG = {
   guide: { label: '가이드', icon: BookOpen, color: 'text-mint-400', bg: 'bg-mint-400/10 border-mint-400/20' },
-  tool: { label: '도구', icon: Wrench, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
-  prompt: { label: '프롬프트', icon: Code2, color: 'text-purple-400', bg: 'bg-purple-400/10 border-purple-400/20' },
-  showcase: { label: '결과물', icon: Layers, color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
+  ai: { label: 'AI', icon: Cpu, color: 'text-purple-400', bg: 'bg-purple-400/10 border-purple-400/20' },
+  review: { label: '리뷰', icon: Star, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
+  log: { label: '로그', icon: FileText, color: 'text-cyan-400', bg: 'bg-cyan-400/10 border-cyan-400/20' },
+  essay: { label: '에세이', icon: Feather, color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
 }
 
 type Props = {
