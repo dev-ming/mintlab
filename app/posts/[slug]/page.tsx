@@ -70,7 +70,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           <p className="text-slate-500 dark:text-slate-400 text-base">{meta.excerpt}</p>
           <div className="flex flex-wrap gap-2 mt-4">
             {meta.tags.map((tag) => (
-              <span key={tag} className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/8">
+              <span key={tag} className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1b1d24] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/8">
                 #{tag}
               </span>
             ))}

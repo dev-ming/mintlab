@@ -21,7 +21,7 @@ export default function PostCard({ post, featured = false }: Props) {
   if (featured) {
     return (
       <Link href={`/posts/${post.slug}`}>
-        <div className="group rounded-xl border border-slate-200 dark:border-white/8 bg-white dark:bg-white/3 hover:border-slate-300 dark:hover:border-white/15 hover:bg-slate-50 dark:hover:bg-white/5 transition-all p-6">
+        <div className="group rounded-xl border border-slate-200 dark:border-white/8 bg-white dark:bg-[#16181e] hover:border-slate-300 dark:hover:border-white/15 hover:bg-slate-50 dark:hover:bg-[#1b1d24] transition-all p-6">
           <div className="flex items-center gap-2 mb-3">
             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${cfg.bg} ${cfg.color}`}>
               {cfg.label}
@@ -38,7 +38,7 @@ export default function PostCard({ post, featured = false }: Props) {
           <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-4">{post.excerpt}</p>
           <div className="flex flex-wrap gap-1.5">
             {post.tags.slice(0, 5).map((tag) => (
-              <span key={tag} className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-500 border border-slate-200 dark:border-white/8">
+              <span key={tag} className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1b1d24] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/8">
                 #{tag}
               </span>
             ))}
@@ -50,7 +50,7 @@ export default function PostCard({ post, featured = false }: Props) {
 
   return (
     <Link href={`/posts/${post.slug}`}>
-      <div className="group h-full rounded-xl border border-slate-200 dark:border-white/8 bg-white dark:bg-white/3 hover:border-slate-300 dark:hover:border-white/15 hover:bg-slate-50 dark:hover:bg-white/5 transition-all p-4">
+      <div className="group h-full rounded-xl border border-slate-200 dark:border-white/8 bg-white dark:bg-[#16181e] hover:border-slate-300 dark:hover:border-white/15 hover:bg-slate-50 dark:hover:bg-[#1b1d24] transition-all p-4">
         <div className="flex items-center gap-2 mb-2">
           <Icon size={12} className={cfg.color} />
           <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
