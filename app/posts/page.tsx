@@ -1,9 +1,16 @@
 import { getAllPosts, getAllTags } from '@/lib/content'
-import PostCard from '@/components/PostCard'
+import PostList from '@/components/PostList'
 import TagFilter from '@/components/TagFilter'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: '전체 글' }
+
+const CATEGORY_LABELS: Record<string, string> = {
+  guide: '가이드',
+  ai: 'AI',
+  review: '리뷰',
+  log: '로그',
+}
 
 export default function PostsPage({
   searchParams,
@@ -19,20 +26,11 @@ export default function PostsPage({
     return true
   })
 
-  const CATEGORY_LABELS: Record<string, string> = {
-    guide: '가이드',
-    ai: 'AI',
-    review: '리뷰',
-    log: '로그',
-  }
-
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">전체 글</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
-          {allPosts.length}개의 포스트
-        </p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">{allPosts.length}개의 포스트</p>
       </div>
 
       {/* 카테고리 탭 */}
@@ -59,16 +57,8 @@ export default function PostsPage({
       {/* 태그 필터 */}
       <TagFilter tags={allTags} activeTag={searchParams.tag} />
 
-      {/* 포스트 목록 */}
-      {filtered.length === 0 ? (
-        <p className="text-slate-400 dark:text-slate-500 text-sm py-12 text-center">해당하는 글이 없습니다.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-          {filtered.map((p) => (
-            <PostCard key={p.slug} post={p} />
-          ))}
-        </div>
-      )}
+      {/* 타임라인 목록 */}
+      <PostList posts={filtered} />
     </div>
   )
 }
