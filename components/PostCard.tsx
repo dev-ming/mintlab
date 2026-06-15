@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { PostMeta } from '@/lib/content'
-import { BookOpen, Cpu, Star, FileText } from 'lucide-react'
+import { BookOpen, Cpu, Star, FileText, Clock } from 'lucide-react'
 
 const CATEGORY_CONFIG = {
   guide: { label: '가이드', icon: BookOpen, color: 'text-mint-400', bg: 'bg-mint-400/10 border-mint-400/20' },
@@ -27,6 +27,10 @@ export default function PostCard({ post, featured = false }: Props) {
               {cfg.label}
             </span>
             <time className="text-xs text-slate-500">{post.date}</time>
+            <span className="text-xs text-slate-600 flex items-center gap-1 ml-auto">
+              <Clock size={10} />
+              {post.readingTime}분
+            </span>
           </div>
           <h2 className="text-xl font-bold text-slate-100 mb-2 group-hover:text-mint-400 transition-colors">
             {post.title}
@@ -51,6 +55,10 @@ export default function PostCard({ post, featured = false }: Props) {
           <Icon size={12} className={cfg.color} />
           <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
           <time className="text-xs text-slate-600 ml-auto">{post.date}</time>
+          <span className="text-xs text-slate-600 flex items-center gap-0.5">
+            <Clock size={10} />
+            {post.readingTime}분
+          </span>
         </div>
         <h3 className="text-sm font-semibold text-slate-200 mb-1.5 group-hover:text-mint-400 transition-colors line-clamp-2">
           {post.title}

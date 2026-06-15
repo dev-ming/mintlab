@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Link from 'next/link'
 import { Cpu } from 'lucide-react'
+import Search from '@/components/Search'
+import { getAllPosts } from '@/lib/content'
 
 export const metadata: Metadata = {
   title: { default: 'Mintlab', template: '%s | Mintlab' },
@@ -17,6 +19,8 @@ const NAV = [
 ]
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const posts = getAllPosts()
+
   return (
     <html lang="ko">
       <body className="bg-[#0f1117] text-slate-200 min-h-screen font-pretendard antialiased">
@@ -27,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Cpu size={16} />
               Mintlab
             </Link>
-            <nav className="flex gap-1">
+            <nav className="flex gap-1 flex-1">
               {NAV.map(({ href, label }) => (
                 <Link
                   key={href}
@@ -38,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Link>
               ))}
             </nav>
+            <Search posts={posts} />
           </div>
         </header>
 
