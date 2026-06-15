@@ -16,14 +16,14 @@ export default function HomePage() {
     <div className="space-y-16">
       {/* Hero */}
       <section>
-        <div className="mb-2 text-xs font-semibold text-mint-400 uppercase tracking-widest">
+        <div className="mb-2 text-xs font-semibold text-mint-500 dark:text-mint-400 uppercase tracking-widest">
           Mintlab
         </div>
-        <h1 className="text-3xl font-bold text-slate-100 mb-3 leading-tight">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3 leading-tight">
           직접 만들고, 깨지고,<br />
-          <span className="text-mint-400">고친 것들의 기록</span>
+          <span className="text-mint-500 dark:text-mint-400">고친 것들의 기록</span>
         </h1>
-        <p className="text-slate-400 text-base max-w-lg">
+        <p className="text-slate-500 dark:text-slate-400 text-base max-w-lg">
           개발 경험, AI 활용, 도구 리뷰, 그리고 생각들을 기록합니다.
         </p>
       </section>
@@ -32,8 +32,8 @@ export default function HomePage() {
       {featured && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">최신</h2>
-            <Link href="/posts" className="text-xs text-mint-400 flex items-center gap-1 hover:underline">
+            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">최신</h2>
+            <Link href="/posts" className="text-xs text-mint-500 dark:text-mint-400 flex items-center gap-1 hover:underline">
               전체 보기 <ArrowRight size={12} />
             </Link>
           </div>
@@ -50,8 +50,8 @@ export default function HomePage() {
       {guides.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">가이드</h2>
-            <Link href="/posts?category=guide" className="text-xs text-mint-400 flex items-center gap-1 hover:underline">
+            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">가이드</h2>
+            <Link href="/posts?category=guide" className="text-xs text-mint-500 dark:text-mint-400 flex items-center gap-1 hover:underline">
               더 보기 <ArrowRight size={12} />
             </Link>
           </div>
@@ -64,8 +64,8 @@ export default function HomePage() {
       {aiPosts.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">AI</h2>
-            <Link href="/ai" className="text-xs text-mint-400 flex items-center gap-1 hover:underline">
+            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">AI</h2>
+            <Link href="/ai" className="text-xs text-mint-500 dark:text-mint-400 flex items-center gap-1 hover:underline">
               더 보기 <ArrowRight size={12} />
             </Link>
           </div>
@@ -78,8 +78,8 @@ export default function HomePage() {
       {reviews.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">리뷰</h2>
-            <Link href="/reviews" className="text-xs text-mint-400 flex items-center gap-1 hover:underline">
+            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">리뷰</h2>
+            <Link href="/reviews" className="text-xs text-mint-500 dark:text-mint-400 flex items-center gap-1 hover:underline">
               더 보기 <ArrowRight size={12} />
             </Link>
           </div>

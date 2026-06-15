@@ -29,8 +29,8 @@ export default function PostsPage({
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-100 mb-2">전체 글</h1>
-        <p className="text-slate-400 text-sm">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">전체 글</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
           {allPosts.length}개의 포스트
         </p>
       </div>
@@ -46,8 +46,8 @@ export default function PostsPage({
               href={cat ? `/posts?category=${cat}` : '/posts'}
               className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                 active
-                  ? 'bg-mint-400/10 border-mint-400/30 text-mint-400'
-                  : 'border-white/8 text-slate-400 hover:text-slate-200 hover:border-white/15'
+                  ? 'bg-mint-500/10 dark:bg-mint-400/10 border-mint-500/30 dark:border-mint-400/30 text-mint-500 dark:text-mint-400'
+                  : 'border-slate-200 dark:border-white/8 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-white/15'
               }`}
             >
               {label}
@@ -61,7 +61,7 @@ export default function PostsPage({
 
       {/* 포스트 목록 */}
       {filtered.length === 0 ? (
-        <p className="text-slate-500 text-sm py-12 text-center">해당하는 글이 없습니다.</p>
+        <p className="text-slate-400 dark:text-slate-500 text-sm py-12 text-center">해당하는 글이 없습니다.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
           {filtered.map((p) => (

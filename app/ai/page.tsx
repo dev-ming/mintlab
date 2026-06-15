@@ -17,7 +17,6 @@ export default function AiPage({
   searchParams: { sub?: string }
 }) {
   const allAiPosts = getAllPosts().filter((p) => p.category === 'ai')
-
   const filtered = searchParams.sub
     ? allAiPosts.filter((p) => p.subcategory === searchParams.sub)
     : allAiPosts
@@ -25,8 +24,8 @@ export default function AiPage({
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-100 mb-2">AI</h1>
-        <p className="text-slate-400 text-sm">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">AI</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
           AI 도구 활용, 워크플로우 자동화, 프롬프트 엔지니어링
         </p>
       </div>
@@ -42,8 +41,8 @@ export default function AiPage({
               href={sub ? `/ai?sub=${sub}` : '/ai'}
               className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                 active
-                  ? 'bg-purple-400/10 border-purple-400/30 text-purple-400'
-                  : 'border-white/8 text-slate-400 hover:text-slate-200 hover:border-white/15'
+                  ? 'bg-purple-500/10 dark:bg-purple-400/10 border-purple-500/30 dark:border-purple-400/30 text-purple-500 dark:text-purple-400'
+                  : 'border-slate-200 dark:border-white/8 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-white/15'
               }`}
             >
               {label}
@@ -53,7 +52,7 @@ export default function AiPage({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-slate-500 text-sm py-12 text-center">해당하는 글이 없습니다.</p>
+        <p className="text-slate-400 dark:text-slate-500 text-sm py-12 text-center">해당하는 글이 없습니다.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {filtered.map((p) => (

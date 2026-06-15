@@ -52,52 +52,42 @@ export default function PostPage({ params }: { params: { slug: string } }) {
 
   const { meta, content } = post
   const headings = extractHeadings(content)
-
-  const seriesPosts =
-    meta.series ? getPostsBySeries(meta.series) : []
+  const seriesPosts = meta.series ? getPostsBySeries(meta.series) : []
 
   return (
     <div className="lg:flex lg:gap-10 lg:items-start">
       {/* 본문 */}
       <article className="flex-1 min-w-0">
-        {/* 헤더 */}
-        <header className="mb-10 pb-8 border-b border-white/8">
+        <header className="mb-10 pb-8 border-b border-slate-200 dark:border-white/8">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-mint-400/10 text-mint-400 border border-mint-400/20">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-mint-500/10 dark:bg-mint-400/10 text-mint-500 dark:text-mint-400 border border-mint-500/20 dark:border-mint-400/20">
               {CATEGORY_LABEL[meta.category] ?? meta.category}
             </span>
             <time className="text-xs text-slate-500">{meta.date}</time>
             <span className="text-xs text-slate-400 ml-auto">{meta.readingTime}분 읽기</span>
           </div>
-          <h1 className="text-3xl font-bold text-slate-100 leading-tight mb-4">{meta.title}</h1>
-          <p className="text-slate-400 text-base">{meta.excerpt}</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 leading-tight mb-4">{meta.title}</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-base">{meta.excerpt}</p>
           <div className="flex flex-wrap gap-2 mt-4">
             {meta.tags.map((tag) => (
-              <span key={tag} className="text-xs px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/8">
+              <span key={tag} className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/8">
                 #{tag}
               </span>
             ))}
           </div>
         </header>
 
-        {/* 시리즈 네비게이션 */}
         {meta.series && seriesPosts.length > 1 && (
-          <SeriesNav
-            currentSlug={meta.slug}
-            seriesName={meta.series}
-            posts={seriesPosts}
-          />
+          <SeriesNav currentSlug={meta.slug} seriesName={meta.series} posts={seriesPosts} />
         )}
 
-        {/* 인라인 임베드 */}
         {meta.embedUrl && (
           <div className="mb-10">
             <EmbedViewer src={meta.embedUrl} height={520} />
           </div>
         )}
 
-        {/* MDX 본문 */}
-        <div className="prose prose-invert prose-sm sm:prose-base max-w-none">
+        <div className="prose dark:prose-invert sm:prose-base max-w-none">
           <MDXRemote
             source={content}
             components={components}

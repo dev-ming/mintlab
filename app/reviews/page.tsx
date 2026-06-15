@@ -10,18 +10,18 @@ export default function ReviewsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-100 mb-2">리뷰</h1>
-        <p className="text-slate-400 text-sm">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">리뷰</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
           직접 써본 도구·라이브러리·서비스 리뷰
         </p>
       </div>
 
       {posts.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-slate-500 text-sm">아직 등록된 리뷰가 없습니다.</p>
-          <p className="text-slate-600 text-xs mt-2">
-            <code className="bg-white/5 px-2 py-1 rounded">content/posts/</code>에{' '}
-            <code className="bg-white/5 px-2 py-1 rounded">category: "review"</code> 포스트를 추가하세요.
+          <p className="text-slate-400 dark:text-slate-500 text-sm">아직 등록된 리뷰가 없습니다.</p>
+          <p className="text-slate-400 dark:text-slate-600 text-xs mt-2">
+            <code className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">content/posts/</code>에{' '}
+            <code className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">category: "review"</code> 포스트를 추가하세요.
           </p>
         </div>
       ) : (

@@ -42,11 +42,11 @@ export default function Search({ posts }: { posts: SearchPost[] }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
       >
         <SearchIcon size={14} />
         <span className="hidden sm:inline text-xs">검색</span>
-        <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] text-slate-600 border border-white/10 rounded px-1 py-0.5 ml-1">
+        <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-white/10 rounded px-1 py-0.5 ml-1">
           <Command size={9} />K
         </kbd>
       </button>
@@ -54,21 +54,21 @@ export default function Search({ posts }: { posts: SearchPost[] }) {
       {open && (
         <>
           <div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
           <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-4">
-            <div className="bg-[#1a1d27] border border-white/10 rounded-xl shadow-2xl overflow-hidden">
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-white/8">
+            <div className="bg-white dark:bg-[#1a1d27] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-white/8">
                 <SearchIcon size={14} className="text-slate-400 flex-shrink-0" />
                 <input
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="검색..."
-                  className="flex-1 bg-transparent text-sm text-slate-200 placeholder:text-slate-500 outline-none"
+                  className="flex-1 bg-transparent text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none"
                 />
-                <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-slate-300 transition-colors">
+                <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
                   <X size={14} />
                 </button>
               </div>
@@ -80,18 +80,18 @@ export default function Search({ posts }: { posts: SearchPost[] }) {
                       <Link
                         href={`/posts/${p.slug}`}
                         onClick={() => { setOpen(false); setQuery('') }}
-                        className="flex flex-col gap-0.5 px-4 py-2.5 hover:bg-white/5 transition-colors"
+                        className="flex flex-col gap-0.5 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                       >
-                        <span className="text-sm text-slate-200">{p.title}</span>
+                        <span className="text-sm text-slate-900 dark:text-slate-200">{p.title}</span>
                         <span className="text-xs text-slate-500 line-clamp-1">{p.excerpt}</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
               ) : query ? (
-                <p className="text-center text-slate-500 text-sm py-8">결과 없음</p>
+                <p className="text-center text-slate-400 dark:text-slate-500 text-sm py-8">결과 없음</p>
               ) : (
-                <p className="text-center text-slate-500 text-sm py-8">검색어를 입력하세요</p>
+                <p className="text-center text-slate-400 dark:text-slate-500 text-sm py-8">검색어를 입력하세요</p>
               )}
             </div>
           </div>
