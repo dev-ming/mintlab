@@ -2,12 +2,15 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 
+export type AiSubcategory = 'guide' | 'tool' | 'prompt' | 'showcase'
+
 export type PostMeta = {
   slug: string
   title: string
   date: string
   tags: string[]
   category: 'guide' | 'ai' | 'review' | 'log' | 'essay'
+  subcategory?: AiSubcategory
   excerpt: string
   embedUrl?: string
 }

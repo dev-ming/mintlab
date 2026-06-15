@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 const NAV = [
   { href: '/posts', label: '전체' },
+  { href: '/ai', label: 'AI' },
   { href: '/reviews', label: '리뷰' },
   { href: '/logs', label: '로그' },
 ]
