@@ -63,7 +63,7 @@ export default function PostList({ posts }: { posts: PostMeta[] }) {
               <motion.div key={post.slug} variants={rowVariant}>
                 <Link
                   href={`/posts/${post.slug}`}
-                  className="group flex items-center gap-3 sm:gap-4 py-3 px-3 -mx-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150"
+                  className="group flex items-center gap-3 sm:gap-4 py-3 px-3 -mx-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.04] transition-colors duration-150"
                 >
                   <span className="font-mono text-xs text-slate-400 dark:text-slate-500 min-w-[36px] flex-shrink-0 tabular-nums">
                     {mmdd}

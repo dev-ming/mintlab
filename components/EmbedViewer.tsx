@@ -14,9 +14,9 @@ export default function EmbedViewer({ src, height = 500, title }: Props) {
   const displayHeight = expanded ? 800 : height
 
   return (
-    <div className="rounded-xl border border-white/10 overflow-hidden bg-[#0a0d14]">
+    <div className="rounded-xl border border-white/[0.06] overflow-hidden bg-[#0d1118]">
       {/* 툴바 */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/8 bg-white/3">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06] bg-white/[0.03]">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
             <span className="w-3 h-3 rounded-full bg-red-500/50" />

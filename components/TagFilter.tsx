@@ -32,7 +32,7 @@ export default function TagFilter({ tags, activeTag }: Props) {
           className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
             activeTag === tag
               ? 'bg-mint-400/15 border-mint-400/40 text-mint-400'
-              : 'border-white/8 text-slate-500 hover:text-slate-300 hover:border-white/15'
+              : 'border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-white/[0.1]'
           }`}
         >
           #{tag}

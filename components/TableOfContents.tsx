@@ -28,7 +28,7 @@ export default function TableOfContents({ headings }: { headings: Heading[] }) {
   if (headings.length === 0) return null
 
   return (
-    <nav className="border-l border-slate-200 pl-4 dark:border-white/8">
+    <nav className="border-l border-slate-200 pl-4 dark:border-white/[0.06]">
       <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-3">
         ON THIS PAGE
       </p>

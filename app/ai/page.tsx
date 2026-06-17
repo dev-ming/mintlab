@@ -42,7 +42,7 @@ export default function AiPage({
               className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                 active
                   ? 'bg-purple-500/10 dark:bg-purple-400/10 border-purple-500/30 dark:border-purple-400/30 text-purple-500 dark:text-purple-400'
-                  : 'border-slate-200 dark:border-white/8 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-white/15'
+                  : 'border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-white/[0.1]'
               }`}
             >
               {label}

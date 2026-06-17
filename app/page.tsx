@@ -15,7 +15,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-14">
-      <section className="grid gap-8 border-b border-slate-200 pb-10 dark:border-white/8 md:grid-cols-[1fr_220px]">
+      <section className="grid gap-8 border-b border-slate-200/80 pb-10 dark:border-white/[0.06] md:grid-cols-[1fr_220px]">
         <div>
           <div className="mb-3 flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-mint-600 dark:text-mint-400">
             <Archive size={13} />
@@ -30,21 +30,21 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-3 gap-2 md:grid-cols-1">
-          <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-white/8 dark:bg-[#16181e]">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-white/[0.06] dark:bg-[#171b23]">
             <div className="mb-1 flex items-center gap-1.5 text-[11px] text-slate-400">
               <Layers3 size={12} />
               POSTS
             </div>
             <div className="font-mono text-xl font-semibold text-slate-900 dark:text-slate-100">{posts.length}</div>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-white/8 dark:bg-[#16181e]">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-white/[0.06] dark:bg-[#171b23]">
             <div className="mb-1 flex items-center gap-1.5 text-[11px] text-slate-400">
               <CalendarDays size={12} />
               UPDATED
             </div>
             <div className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">{latestDate}</div>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-white/8 dark:bg-[#16181e]">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-white/[0.06] dark:bg-[#171b23]">
             <div className="mb-1 text-[11px] text-slate-400">CATEGORIES</div>
             <div className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">4 tracks</div>
           </div>
@@ -65,7 +65,7 @@ export default function HomePage() {
               <Link
                 key={p.slug}
                 href={`/posts/${p.slug}`}
-                className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-white/5"
+                className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.04]"
               >
                 <span className="font-mono text-xs text-slate-400 tabular-nums">{p.date.slice(5).replace('-', '.')}</span>
                 <span className="min-w-0 flex-1 truncate text-slate-700 transition-colors group-hover:text-mint-600 dark:text-slate-300 dark:group-hover:text-mint-400">

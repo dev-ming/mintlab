@@ -42,11 +42,11 @@ export default function Search({ posts }: { posts: SearchPost[] }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/[0.04] transition-colors"
       >
         <SearchIcon size={14} />
         <span className="hidden sm:inline text-xs">검색</span>
-        <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-white/10 rounded px-1 py-0.5 ml-1">
+        <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-white/[0.07] rounded px-1 py-0.5 ml-1">
           <Command size={9} />K
         </kbd>
       </button>
@@ -58,8 +58,8 @@ export default function Search({ posts }: { posts: SearchPost[] }) {
             onClick={() => setOpen(false)}
           />
           <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-4">
-            <div className="bg-white dark:bg-[#1a1d27] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden">
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-white/8">
+            <div className="bg-white dark:bg-[#171b23] border border-slate-200 dark:border-white/[0.07] rounded-xl shadow-2xl overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-white/[0.06]">
                 <SearchIcon size={14} className="text-slate-400 flex-shrink-0" />
                 <input
                   autoFocus
@@ -80,7 +80,7 @@ export default function Search({ posts }: { posts: SearchPost[] }) {
                       <Link
                         href={`/posts/${p.slug}`}
                         onClick={() => { setOpen(false); setQuery('') }}
-                        className="flex flex-col gap-0.5 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                        className="flex flex-col gap-0.5 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-white/[0.04] transition-colors"
                       >
                         <span className="text-sm text-slate-900 dark:text-slate-200">{p.title}</span>
                         <span className="text-xs text-slate-500 line-clamp-1">{p.excerpt}</span>
