@@ -37,7 +37,7 @@ export default function PostCard({ post, featured = false }: Props) {
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-4">{post.excerpt}</p>
           <div className="flex flex-wrap gap-1.5">
-            {post.tags.slice(0, 5).map((tag) => (
+            {post.tags.slice(0, 3).map((tag) => (
               <span key={tag} className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1a202a] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/[0.06]">
                 #{tag}
               </span>
