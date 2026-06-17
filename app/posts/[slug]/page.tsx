@@ -98,10 +98,8 @@ export default function PostPage({ params }: { params: { slug: string } }) {
 
       {/* 목차 사이드바 */}
       {headings.length > 0 && (
-        <aside className="hidden lg:block w-48 flex-shrink-0">
-          <div className="sticky top-24">
-            <TableOfContents headings={headings} />
-          </div>
+        <aside className="sticky top-20 hidden max-h-[calc(100vh-6rem)] w-48 flex-shrink-0 self-start overflow-y-auto pb-4 lg:block">
+          <TableOfContents headings={headings} />
         </aside>
       )}
     </div>
