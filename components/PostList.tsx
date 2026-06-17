@@ -68,10 +68,10 @@ export default function PostList({ posts }: { posts: PostMeta[] }) {
                   <span className="font-mono text-xs text-slate-400 dark:text-slate-500 min-w-[36px] flex-shrink-0 tabular-nums">
                     {mmdd}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${cfg.bg} ${cfg.color}`}>
+                  <span className={`text-[11px] px-1.5 py-0.5 rounded-md border flex-shrink-0 ${cfg.bg} ${cfg.color}`}>
                     {cfg.label}
                   </span>
-                  <span className="flex-1 text-sm text-slate-800 dark:text-slate-200 group-hover:text-slate-500 dark:group-hover:text-slate-400 transition-colors duration-150 truncate">
+                  <span className="flex-1 text-sm text-slate-800 dark:text-slate-200 group-hover:text-mint-600 dark:group-hover:text-mint-400 group-hover:translate-x-0.5 transition-all duration-150 truncate">
                     {post.title}
                   </span>
                   <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0 tabular-nums hidden sm:inline">

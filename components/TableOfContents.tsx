@@ -28,17 +28,22 @@ export default function TableOfContents({ headings }: { headings: Heading[] }) {
   if (headings.length === 0) return null
 
   return (
-    <nav>
-      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-        목차
+    <nav className="border-l border-slate-200 pl-4 dark:border-white/8">
+      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-3">
+        ON THIS PAGE
       </p>
-      <ul className="space-y-1.5">
+      <ul className="space-y-1">
         {headings.map((h) => (
-          <li key={h.id} style={{ paddingLeft: `${(h.level - 1) * 10}px` }}>
+          <li key={h.id} className="relative" style={{ paddingLeft: `${(h.level - 1) * 10}px` }}>
+            {active === h.id && (
+              <span className="absolute -left-4 top-1 h-3.5 w-px rounded-full bg-mint-500 dark:bg-mint-400" />
+            )}
             <a
               href={`#${h.id}`}
-              className={`block text-xs leading-snug transition-colors hover:text-slate-200 ${
-                active === h.id ? 'text-mint-400' : 'text-slate-500'
+              className={`block rounded-sm py-0.5 text-xs leading-snug transition-colors ${
+                active === h.id
+                  ? 'font-medium text-mint-600 dark:text-mint-400'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-500 dark:hover:text-slate-300'
               }`}
             >
               {h.text}

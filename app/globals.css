@@ -6,7 +6,7 @@
 
 /* 코드 블록 — 라이트/다크 모두 다크 유지 */
 .prose pre {
-  @apply bg-[#0a0d14] border border-white/[8%] rounded-xl;
+  @apply m-0 bg-transparent border-0 rounded-none;
 }
 
 .prose code:not(pre code) {
