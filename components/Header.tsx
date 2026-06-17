@@ -32,7 +32,7 @@ export default function Header({ posts }: Props) {
           Mintlab
         </Link>
 
-        <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
+        <nav className="flex min-w-0 flex-1 gap-1 overflow-visible">
           {NAV.map(({ href, label }) => {
             const active = href === '/posts' ? pathname === href : pathname.startsWith(href)
             return (
