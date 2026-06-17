@@ -1,0 +1,205 @@
+---
+title: "배포 후 간헐적 404(청크 로드 에러) 자동 복구하기"
+date: "2026-06-17"
+tags: ["nextjs", "deploy", "chunk-load-error", "turbopack", "error-boundary", "recovery"]
+category: "log"
+excerpt: "배포 경계를 넘은 기존 세션이 사라진 옛 청크를 lazy-load하며 발생한 간헐적 404를, 청크 에러 감지와 안전한 자동 새로고침으로 복구한 기록"
+---
+
+## 증상
+
+배포하고 나면 가끔 이런 일이 생긴다. 사용자가 하단 탭바의 **Home을 누르면 404**가 뜨거나, 콘솔에 이런 에러가 찍힌다.
+
+```text
+Uncaught Error: Module 65205 was instantiated because it was required from
+module 38116, but the module factory is not available
+```
+
+특징이 묘했다.
+
+- **로컬에선 안 뜨고, 배포된 환경에서만** 뜬다.
+- **항상은 아니고 종종**, 그리고 **URL 이동, 즉 페이지 전환을 할 때** 터진다.
+- 새로고침하면 멀쩡해진다.
+
+원인을 모르면 랜덤 버그처럼 보이지만, 이 세 가지 단서만으로 범인은 거의 특정된다.
+
+---
+
+## 오진 먼저
+
+처음엔 dev 환경 얘기인 줄 알고 **Turbopack HMR 캐시 불일치**를 의심했다.
+
+하지만 사용자가 **"배포 후에만, 로컬은 멀쩡"** 이라고 정정해주면서 그 가설은 폐기됐다. dev HMR 문제라면 로컬에서 더 자주 나야 한다.
+
+다음 의심은 **서비스 워커(PWA)** 였다. 옛 자산을 캐시해서 주는 것 아니냐는 가설이었다.
+
+`sw.js`를 열어보니 이 서비스 워커는 `navigate` 요청만 network-first로 처리하고, **JS 청크는 캐시하지 않았다**. 애초에 `cache.put`이 없었다. 무죄.
+
+교훈은 단순하다.
+
+> 같은 에러도 어디서, 언제, 얼마나 자주 나는지를 정확히 좁히면 엉뚱한 데 파지 않는다.
+
+---
+
+## 진짜 원인: 배포 스큐(deploy skew)
+
+web-front dev 환경은 **in-house Docker**로, Next.js `output: standalone` 빌드를 컨테이너가 직접 서빙한다.
+
+Next 16은 dev/build **둘 다 Turbopack이 기본**이라, 산출물 청크 이름이 `turbopack-*`이고 에러도 Turbopack 런타임 형식으로 난다.
+
+흐름을 그려보면 이렇다.
+
+1. 사용자가 앱을 연다.
+2. 브라우저는 **빌드 A**의 청크 그래프를 들고 있다.
+3. 그 사이 새 배포가 일어난다.
+4. 컨테이너가 **빌드 B**로 교체된다.
+5. 빌드 A의 `/_next/static/...` 청크는 새 컨테이너에 없다.
+6. 사용자가 client-side navigation으로 페이지를 이동한다.
+7. Next 라우터가 해당 화면에 필요한 **빌드 A의 청크를 lazy-load**하려고 한다.
+8. 새 컨테이너엔 그 청크가 없으므로 404 또는 `module factory is not available`이 난다.
+
+즉 **배포 전부터 열어둔 세션**이 **배포 경계를 넘어 페이지를 이동할 때만** 터진다.
+
+증상의 세 단서와 정확히 맞는다.
+
+- 로컬은 멀쩡하다.
+- 배포 환경에서만 난다.
+- 새로고침하면 괜찮아진다.
+
+CDN invalidation 문제가 아니다. 여기선 CDN이 정적 에셋을 보존해주는 구조가 아니었다. 그냥 **컨테이너 교체로 옛 청크가 물리적으로 없어지는 것**이다.
+
+invalidation은 새로 들어오는 방문자에게는 도움이 될 수 있지만, 이미 열린 세션의 스큐는 못 고친다.
+
+---
+
+## 해결: 청크 에러를 감지해 자동 새로고침
+
+옛 청크가 없어서 나는 에러라면, **감지하는 순간 전체 새로고침으로 새 빌드를 받아오면** 된다.
+
+문제는 그 에러가 어디로 표면화되느냐가 두 갈래라는 점이다.
+
+- **비동기/uncaught 경로**
+  - 동적 import 실패는 Promise reject, 즉 `unhandledrejection`으로 온다.
+  - 모듈 평가 중 throw는 `window.onerror`로 온다.
+- **React 렌더 경로**
+  - 렌더 중 터지면 React가 가로채 error boundary로 보낸다.
+  - 이 경우 window 이벤트로 안 간다.
+
+그래서 둘 다 잡아야 한다.
+
+```text
+lib/chunk-reload.ts
+  감지(isChunkLoadError) + 가드 새로고침 공용 로직
+
+app/components/.../ChunkReloader.tsx
+  window error / unhandledrejection 경로
+
+app/global-error.tsx
+  React 렌더 경로(root error boundary)
+```
+
+감지는 메시지 정규식으로 처리했다.
+
+- `ChunkLoadError`
+- `Loading chunk ... failed`
+- `module factory is not available`
+- `was instantiated because it was required from module`
+- `Failed to fetch dynamically imported module`
+
+이 정도면 Next/Webpack/Turbopack/동적 import 계열의 대표적인 청크 실패 메시지를 꽤 넓게 잡을 수 있다.
+
+---
+
+## 함정: 자동 새로고침은 무한 루프가 되기 쉽다
+
+여기서부터가 진짜다.
+
+단순히 "에러 나면 reload"는 위험하다.
+
+- 진짜 깨진 빌드라면 새로고침해도 또 터진다.
+- 그러면 **무한 새로고침**이 된다.
+- `sessionStorage`가 막힌 환경이면 가드가 안 먹어 고속 폭주할 수 있다.
+- 가드가 너무 세면 새로고침은 막혔는데 화면엔 "Updating..."만 뜨고 사용자가 갇힌다.
+
+그래서 가드를 이렇게 설계했다.
+
+1. **모듈 스코프 `reloadedThisLoad`**
+   - 한 번의 페이지 로드당 새로고침 1회만 허용한다.
+   - `sessionStorage`가 막혀도 폭주를 막는다.
+2. **sessionStorage 누적 카운터**
+   - 최대 3회까지만 자동 새로고침한다.
+   - 3회를 넘으면 포기한다.
+3. **`markChunkLoadHealthy()`**
+   - 청크 에러 없이 5초간 살아있으면 정상으로 보고 카운터를 리셋한다.
+   - 다음 배포 때 다시 풀로 시도할 수 있다.
+4. **global-error엔 항상 보이는 수동 버튼**
+   - 자동이 캡에 막혀도 사용자가 직접 빠져나갈 수 있어야 한다.
+   - 버튼을 누르면 카운터를 리셋하고 강제 새로고침한다.
+
+자동 복구는 "새로고침한다"보다 **언제 포기하고, 어떻게 빠져나오게 할 것인가**가 더 중요하다.
+
+---
+
+## 코드 리뷰가 잡아준 한 끗
+
+이 변경을 [코드 리뷰 에이전트](/posts/claude-code-review-qa-commit-pipeline)에 태웠더니 `APPROVE`와 함께 엣지케이스를 짚었다.
+
+요지는 이랬다.
+
+> 카운터가 캡(3)에 도달하면 에러 화면(global-error)으로 빠진다. 그런데 그 화면에선 카운터를 리셋하는 컴포넌트가 마운트되지 않는다. 그래서 사용자가 수동 버튼으로 새 빌드에 진입해도, 같은 탭에서 다음 배포 때는 카운터가 이미 3이라 자동 새로고침이 0회로 시작된다.
+
+해결은 간단했다.
+
+> 수동 버튼 클릭 시 카운터를 함께 리셋한다.
+
+typecheck도 통과하고 테스트도 없는, 순수 논리 엣지였다. 이건 코드 리뷰 단계가 없었다면 그냥 지나갔을 가능성이 높다.
+
+---
+
+## 검증: 재배포 없이 확인하기
+
+청크 에러는 실제 재배포 경계에서 잘 재현된다. 하지만 로직 자체는 재배포 없이도 검증할 수 있다.
+
+### 1) 격리 프로세스 시뮬레이션
+
+`sessionStorage`와 `location.reload`를 스텁으로 갈아끼운 뒤 실제 `chunk-reload.ts`를 import했다.
+
+확인한 케이스는 세 가지다.
+
+- 정상 청크 에러: reload 1회
+- 누적 3회 도달: reload 0회, 포기
+- storage 막힘: 폭주 없이 1회
+
+### 2) 브라우저 콘솔 1줄 end-to-end
+
+브라우저 콘솔에서 직접 error 이벤트를 쏜다.
+
+```js
+window.dispatchEvent(new ErrorEvent('error', {
+  message: 'the module factory is not available'
+}))
+```
+
+페이지가 자동 새로고침되면 성공이다.
+
+다시 테스트하려면 카운터를 지운다.
+
+```js
+sessionStorage.removeItem('chunk-reload-attempts')
+```
+
+---
+
+## 정리
+
+- 배포 후 **가끔, 이동할 때 404**는 십중팔구 배포 스큐다.
+- 이미 열린 세션이 사라진 옛 청크를 lazy-load하려다 실패하는 것이다.
+- CDN invalidation 문제가 아니라 **빌드 교체로 옛 청크가 없어지는 문제**일 수 있다.
+- 실용적 해법은 청크 에러를 감지해 전체 새로고침으로 새 빌드를 받게 하는 것이다.
+- 에러는 window 경로와 React 렌더 경로 둘로 새므로 **ChunkReloader + global-error** 둘 다 둬야 한다.
+- 자동 새로고침은 무한 루프, 폭주, 갇힘을 반드시 같이 설계해야 한다.
+- 근본 차단을 더 원하면 `deploymentId`, 옛 빌드 정적 에셋 보존, `assetPrefix` + CDN 같은 구조를 고려한다.
+
+"랜덤하게 404가 뜬다"는 신고를, 세 가지 단서로 좁혀 배포 스큐로 특정했다.
+
+그리고 사용자가 모르게 새 빌드로 넘어가도록, 청크 에러를 안전하게 자동 복구했다.
