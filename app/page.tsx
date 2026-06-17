@@ -25,7 +25,7 @@ export default function HomePage() {
             실제로 겪은 문제, 고친 흔적, 남겨둔 판단들.
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-7 text-slate-500 dark:text-slate-400">
-            작업 중 마주친 문제와 선택, 자동화, 도구 사용 경험을 나중의 나와 동료가 다시 찾기 좋게 정리합니다.
+            코드 뒤에 남은 판단과 시행착오를 모읍니다.
           </p>
         </div>
 
