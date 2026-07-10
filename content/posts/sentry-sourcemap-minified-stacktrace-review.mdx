@@ -1,0 +1,156 @@
+---
+title: "Sentry 소스맵, \"업로드 성공\"인데 왜 minified로 보이나 — 회고"
+date: "2026-06-24"
+tags: ["sentry","nextjs","sourcemap","turbopack","debugging","devlog"]
+category: "log"
+excerpt: "Sentry 소스맵 업로드는 성공했지만 브라우저 에러가 계속 minified로 보였던 문제를 추적한 회고."
+---
+
+배포된 앱에서 난 에러가 Sentry에서 계속 암호 같은 minified 스택트레이스로 보였다. "소스맵을 올렸는데 왜 안 풀리지?"를 두 단계에 걸쳐 추적한 기록이다. 결론부터: **소스맵은 올라갔지만, 정작 필요한 "브라우저 소스맵"이 빠진 채 올라가고 있었다.**
+
+---
+
+## 배경: 소스맵이 왜 필요한가
+
+브라우저로 내려가는 코드는 빌드 때 압축(minify)된다. 변수명이 `rE`, `oW` 같은 한두 글자로 바뀌고 한 줄로 뭉친다. 그래서 Sentry에 에러가 떠도 이렇게 보인다.
+
+```
+Element type is invalid: ... but got: undefined.
+  app:///_next/static/chunks/10t-l5_0s265j.js  in rE  at line 21:124765
+  app:///_next/static/chunks/10t-l5_0s265j.js  in oW  at line 21:160606
+```
+
+**소스맵(.map)** 은 이 압축된 코드를 "원래 네가 쓴 파일의 몇 번째 줄"로 되돌려주는 번역기다. 빌드 때 생성해서 Sentry에 올려두면, Sentry가 에러를 받을 때 자동으로 원본 위치로 풀어서 보여준다.
+
+요즘 `@sentry/nextjs`는 **Debug ID** 방식이라, 압축된 JS와 소스맵 양쪽에 같은 ID를 심어두고 그걸로 매칭한다. 그래서 보통은 "빌드 때 올리기만 하면" 알아서 풀린다 — *맞는 소스맵이 올라갔다면.*
+
+---
+
+## 1막: 토큰이 없어서 아예 안 올라가던 시절
+
+처음 증상은 단순했다. 소스맵이 **아예** 안 올라감.
+
+설정을 보면 업로드는 `SENTRY_AUTH_TOKEN`이 있을 때만 동작하도록 가드돼 있었다.
+
+```js
+// apps/web/next.config.mjs
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
+if (!sentryAuthToken) {
+  console.warn("⚠️ [sentry] SENTRY_AUTH_TOKEN 없음 — 소스맵 업로드 skip. ...");
+}
+export default withSentryConfig(withNextIntl(nextConfig), {
+  authToken: sentryAuthToken,
+  silent: false,                       // 업로드 결과를 빌드 로그에 노출
+  sourcemaps: { disable: !sentryAuthToken, deleteSourcemapsAfterUpload: true },
+});
+```
+
+빌드 체인은 이렇다 (dev = **도커 빌드**, Amplify 아님):
+
+```
+infra/scripts/deploy-dev.sh
+  └ docker compose --env-file .env -f infra/local/docker-compose.yml build web
+       └ build.args: SENTRY_AUTH_TOKEN: "${SENTRY_AUTH_TOKEN:-}"   ← .env에서 읽음, 없으면 빈값
+            └ apps/web/Dockerfile: ARG → ENV → next build
+                 └ next.config: 토큰 없으면 업로드 skip
+```
+
+→ dev 호스트 `.env`에 토큰을 넣으니, 빌드 로그에 **"Successfully uploaded source maps"** 가 떴다. 1막 끝. ...인 줄 알았다.
+
+---
+
+## 2막: 올렸다는데 여전히 암호다
+
+토큰도 있고 빌드 로그도 "업로드 성공"인데, Sentry는 여전히 minified. 여기서 한참 헤맸다.
+
+단서는 **업로드된 파일 목록**에 있었다. 로그를 자세히 보니 올라간 `.map`이 전부 이런 것들이었다.
+
+```
+~/chunks/ssr/node_modules_next_..._app-page_....js.map   (debug id ...)
+~/chunks/ssr/node_modules_react-icons_....js.map         (debug id ...)
+~/edge/chunks/....js.map
+~/instrumentation.js.map
+~/middleware.js.map
+[@sentry/nextjs] Info: Successfully uploaded source maps to Sentry
+```
+
+전부 `chunks/ssr/`, `edge/`, `instrumentation`, `middleware` — **서버에서 도는 코드**였다. 정작 에러가 난 건 `app:///_next/static/chunks/...` = **브라우저(클라이언트)** 코드. 그 `static/chunks/*.js.map`은 목록에 **없었다.**
+
+> 영어 번역기는 올렸는데, 들어온 에러는 스페인어였던 셈. 번역기는 멀쩡히 "업로드 성공"이지만 쓸모가 없었다.
+
+| | 🖥️ 서버(SSR/edge) 소스맵 | 🌐 브라우저 소스맵 |
+|---|---|---|
+| 어디 코드 | 서버 렌더링·미들웨어 | 사용자 브라우저에서 도는 코드 |
+| 경로 | `chunks/ssr/...`, `middleware.js` | `static/chunks/...` |
+| 상태 | 잘 올라가고 있었음 ✅ | **생성조차 안 됨** ❌ |
+
+---
+
+## 원인: Turbopack + `productionBrowserSourceMaps`
+
+이 프로젝트는 **Next.js 16 + Turbopack** 빌드다(에러 오버레이에 `Next.js 16.2.6 (Turbopack)`).
+
+- `@sentry/nextjs`는 **webpack 빌드**에서는 클라이언트(브라우저) 소스맵을 자동으로 켜서 생성·업로드해준다.
+- 그런데 **Turbopack 빌드에서는 그 자동 처리가 적용되지 않는다.** 서버/SSR/edge 맵은 Turbopack이 기본 생성하지만, **브라우저 청크 맵은 `productionBrowserSourceMaps: true`가 없으면 만들지 않는다.**
+- next.config에 그 옵션이 없었다 → 브라우저 맵이 생성 대상에서 빠짐 → Sentry는 "있는 것만(server)" 올리고 "성공" 보고 → 클라 에러는 영원히 minified.
+
+```
+Turbopack build
+ ├ 서버/SSR/edge .map      → 자동 생성 → Sentry 업로드 ✅
+ └ 브라우저 static/chunks .map → productionBrowserSourceMaps 없으면 생성 X → 업로드 대상 없음 ❌
+```
+
+---
+
+## 해결: 브라우저 소스맵을 켜되, 토큰 있을 때만
+
+```js
+// apps/web/next.config.mjs
+const nextConfig = {
+  output: "standalone",
+  // Turbopack은 이 옵션 없이는 브라우저(static/chunks) 소스맵을 안 만든다.
+  // 단, 토큰이 있어 업로드+삭제가 보장될 때만 켠다 (토큰 없는 빌드에서 켜면 .map이 산출물에 남아 노출됨).
+  productionBrowserSourceMaps: Boolean(process.env.SENTRY_AUTH_TOKEN),
+  ...
+};
+```
+
+`true`로 무조건 켜지 않고 **`Boolean(SENTRY_AUTH_TOKEN)`** 으로 가드한 이유:
+
+- 토큰이 있는 빌드: 브라우저 맵 생성 → Sentry 업로드 → `deleteSourcemapsAfterUpload: true`가 산출물에서 삭제 → 외부 노출 없음. ✅
+- 토큰이 **없는** 빌드(로컬/일부 CI): 업로드도 삭제도 안 일어남. 이때 맵을 생성하면 `.next`에 그대로 남아 **소스가 공개로 서빙될 위험**. → 그래서 토큰 없으면 아예 생성 안 함.
+
+> 커밋: `🔧 Emit browser source maps for Sentry on Turbopack build`
+
+---
+
+## 배운 점
+
+1. **"업로드 성공" ≠ "그 에러가 풀린다."** 무엇이 올라갔는지(server vs browser) 목록을 봐야 한다. 로그의 `Successfully uploaded`만 믿으면 안 됨.
+2. **에러의 출처를 먼저 본다.** 경로가 `static/chunks/` 면 브라우저, `chunks/ssr/`·`middleware`·`edge` 면 서버. 필요한 소스맵 종류가 갈린다.
+3. **번들러가 바뀌면 가정도 바뀐다.** webpack에서 자동이던 게 Turbopack에서는 수동(`productionBrowserSourceMaps`). "예전엔 됐는데"가 안 통한다.
+4. **소스맵 노출 주의.** 브라우저 소스맵을 켤 땐 반드시 "업로드 후 삭제"와 한 세트로. 토큰 유무로 가드.
+5. **소급 안 됨.** 이미 쌓인 과거 이벤트는 안 풀린다. 재배포 후 **새로 난 이벤트**부터 풀린다 — 검증하려면 에러를 다시 재현해야 한다.
+
+---
+
+## 재발 방지 체크리스트
+
+- [ ] dev `.env`에 `SENTRY_AUTH_TOKEN`, `SENTRY_PROJECT` 존재 (org/url은 기본값 있음)
+- [ ] 빌드 로그에 `⚠️ SENTRY_AUTH_TOKEN 없음` 경고가 **없어야** 함
+- [ ] 업로드 목록에 **`~/static/chunks/*.js.map (debug id ...)`** 가 보여야 함 (← 브라우저 맵)
+- [ ] 재배포 후 에러 재현 → Sentry에서 원본 파일/줄번호로 풀리는지 확인
+- [ ] `NEXT_PUBLIC_SENTRY_DSN`의 프로젝트와 `SENTRY_PROJECT`(업로드 대상)가 동일한지 (다르면 딴 프로젝트로 올라가 매칭 안 됨)
+
+---
+
+## 관련 파일
+
+| 항목 | 위치 |
+|---|---|
+| Sentry/소스맵 설정 | `apps/web/next.config.mjs` |
+| 클라이언트 init | `apps/web/instrumentation-client.ts` |
+| 서버/edge init | `apps/web/sentry.server.config.ts`, `sentry.edge.config.ts` |
+| dev 빌드 args | `infra/local/docker-compose.yml` (web `build.args`) |
+| dev 배포 스크립트 | `infra/scripts/deploy-dev.sh` |
+| 빌드 ARG→ENV | `apps/web/Dockerfile` |

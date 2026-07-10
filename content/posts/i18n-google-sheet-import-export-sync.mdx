@@ -1,0 +1,94 @@
+---
+title: "i18n Google Sheet 동기화 (import / export)"
+date: "2026-06-15"
+tags: ["i18n","google-sheets","automation","import-export","localization","ci"]
+category: "log"
+excerpt: "다국어 키를 Google Sheet와 JSON 사이에서 import/export로 양방향 동기화하는 구조를 정리한 글."
+---
+
+다국어 키(language key)를 구글시트와 양방향으로 동기화하는 구조 정리.
+
+---
+
+## 전체 그림
+
+```
+[개발자가 en.json에 키 추가] → git push
+        │  (CI) EXPORT  ── 신규 키를 시트에 append (en 채움, es/pt 빈칸)
+        ▼
+[번역자가 시트에서 es/pt 채움]
+        │  (배포 build) IMPORT ── 시트 → JSON, 번역 회수
+        ▼
+[messages/{en,es,pt}.json 갱신]
+```
+
+- **import = 시트 → JSON = build 때** (기존부터 있던 것)
+- **export = JSON → 시트 = push 때** (이번에 추가)
+- **source of truth = 시트.** 그래서 export로 신규 키를 시트에 먼저 올려두지 않으면, 다음 build의 import가 JSON을 덮어쓸 때 코드로만 추가한 키가 사라진다. → 이게 "로컬라이징 추가했는데 동기화 안 됨"의 정체였다.
+
+---
+
+## 파일 / 위치
+
+| 항목 | 위치 |
+|---|---|
+| 동기화 스크립트 | `apps/web/scripts/importer.ts` |
+| 자격증명 | `apps/web/scripts/service-account.json` (gitignore: `**/scripts/service-account.json`) |
+| 메시지 파일 | `apps/web/messages/{en,es,pt}.json` |
+| import 실행 | `build:meta` = `bun run scripts/importer.ts downloadLangData` (build 단계) |
+| export 실행 | `i18n:export` = `bun run scripts/importer.ts uploadNewKeys` |
+| CI | `.github/workflows/i18n-export.yml` |
+
+- 시트 ID: `1uO1NsdNcWVGCr2YuCdN7V0ipDsL6fm8D3-dqeyWCoGA` / 탭: `front`
+- 시트 구조: `key | en | es | pt` (첫 행 헤더), 키는 dot-notation (`Comment.reply_placeholder`)
+- 서비스계정: `svc@your-project.iam.gserviceaccount.com`
+
+---
+
+## importer.ts 핵심
+
+- `downloadLangData` (import) — scope `spreadsheets.readonly`. 시트 행을 읽어 dot-notation 키를 중첩 JSON으로 펼쳐(`setNested`) `messages/{lang}.json`에 기록. 빈 값은 스킵.
+- `uploadNewKeys` (export) — scope `spreadsheets`(쓰기). `en.json`을 `flattenKeys`로 평탄화 → 시트 기존 key 집합과 비교 → **시트에 없는 키만** `addRows`로 append(`key`+`en`만, es/pt 빈칸). **append-only — 기존 행/번역 절대 미변경.** 신규 0개면 로그 후 종료.
+
+---
+
+## CI 워크플로 (i18n-export.yml)
+
+```yaml
+on:
+  push:
+    paths: ['apps/web/messages/en.json']   # 전 브랜치 (branches 제한 없음)
+  workflow_dispatch:
+```
+
+- en.json이 바뀐 push면 어느 브랜치든 export 실행.
+- 스텝: checkout → bun setup → install → `secrets.GSHEET_SERVICE_ACCOUNT`를 `service-account.json`으로 기록 → `bun run i18n:export`.
+- ⚠️ `workflow_dispatch` 수동 버튼은 워크플로가 **기본 브랜치(main)** 에 있어야 Actions 탭에 노출됨(GitHub 사양). dev push 자동 트리거는 정상.
+
+---
+
+## 동작 선행 조건 (인프라)
+
+1. 서비스계정 OAuth 스코프: 쓰기(`spreadsheets`) 가능해야 함 — export용.
+2. 대상 시트를 서비스계정 이메일에 **편집자(Editor)** 로 공유. ← 뷰어면 read는 되고 append가 403.
+3. CI용 GitHub Secret `GSHEET_SERVICE_ACCOUNT` = service-account.json 내용 전체.
+
+---
+
+## 테스트 기록 (2026-06-15)
+
+- 더미 키 `_ExportTest.ping` 를 en.json에 넣고 `bun run i18n:export` 실행.
+- 1차: **403 The caller does not have permission** — read(기존 832개)는 됐는데 append만 실패 → 시트가 뷰어로만 공유돼 있었음.
+- 시트를 편집자로 공유 후 재실행: `New keys to append: 1` → `✅ 1개 신규 키를 시트에 추가했습니다.` 성공.
+- append-only 확인: 기존 832행 유지, 1행만 추가. en.json 828 vs 시트 832 차이도 정상 감지.
+- 테스트 후 더미 키/시트 행 정리.
+
+---
+
+## 운영 메모
+
+- 모든 브랜치 push가 단일 시트에 쓰므로, WIP 브랜치의 실험적 키도 시트에 미리 올라간다(append-only라 번역은 안 망가지나 버린 키가 남을 수 있음). 필요 시 특정 브랜치로 좁힐 것.
+- admin(ko/en) export는 범위 외(후속). 현재 export는 web en.json 기준.
+- 코드 `t("...")` 사용처에서 미정의 키 자동 추출은 미구현 — en.json에 직접 추가된 키 기준.
+
+> 관련: [[캐시무효화]] · 개발 블로그 회고 → [[다국어 키 양방향 동기화 자동화 회고]]

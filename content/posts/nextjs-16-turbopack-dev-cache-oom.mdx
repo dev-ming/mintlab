@@ -1,0 +1,83 @@
+---
+title: "Next 16 Turbopack dev 캐시 OOM"
+date: "2026-06-26"
+tags: ["nextjs","turbopack","oom","wsl","cache","debugging"]
+category: "log"
+excerpt: "Next.js 16 Turbopack dev 서버가 WSL에서 OOM으로 죽던 문제를 dev 캐시 비대화 원인까지 추적한 기록."
+---
+
+`bun run dev:web` 실행 중 WSL이 반복적으로 OOM(out of memory)으로 죽던 문제. WSL을 껐다 켜도 재발. 원인은 **Turbopack의 dev 영속 캐시(`.next/dev`) 비대화**였다.
+
+---
+
+## 증상
+
+- `dev:web`(단일 Next.js dev 서버) 실행 중 WSL 전체가 OOM
+- WSL 재시작해도 재발 → 일회성 문제 아님
+- `dmesg` 확인 시 `next-server`가 OOM killer에 죽음:
+  ```
+  Out of memory: Killed process (next-server (v1))
+  total-vm:57796916kB, anon-rss:15262980kB   ← 혼자 RSS ~15GB
+  ```
+
+## 환경
+
+- Next.js **16.2.6** (dev 기본 번들러 = Turbopack)
+- WSL2 메모리 16GB (호스트 32GB, `.wslconfig` 없어 기본 50%)
+- React 19, Sentry(`@sentry/nextjs` ^10)
+
+## 원인 추적 (실측 A/B)
+
+dev 서버를 띄우고 6개 라우트를 반복 타격하며 `next-server` RSS를 추적해 변수별로 비교.
+
+| 조건 | 메모리 거동 | 결과 |
+|---|---|---|
+| Turbopack + 비대 캐시(18GB) | 라우트당 +2~3GB 무한 증가 | ~14.8GB → **OOM** |
+| Sentry OFF | 동일하게 폭증 | OOM (→ **Sentry 무관**) |
+| `next dev --webpack` | ~3GB에서 안정 | 정상 (→ Turbopack 문제) |
+| Turbopack + **캐시 비운 직후** | 2.1GB 찍고 **~1.7GB 평형** | ✅ 정상 |
+
+핵심 단서: `.next` 폴더가 **19GB**였고, 그중 **`.next/dev`가 18GB**.
+
+```
+$ du -sh .next/*
+18G   .next/dev      ← Turbopack 영속 dev 캐시
+1.2G  .next/cache
+...
+```
+
+## 결론
+
+- **`experimental.turbopackFileSystemCacheForDev`가 Next 16.1.0부터 dev 기본 ON** ([공식 문서](https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopackFileSystemCache))
+- 이 캐시가 세션을 거듭하며 `.next/dev`에 수십 GB까지 누적
+- dev 시작/컴파일 시 Turbopack이 이 거대 캐시를 메모리로 끌어올리며 RSS 폭발 → 16GB 천장 치고 자멸
+- WSL 메모리나 Sentry는 무관 (실측으로 배제)
+- 참고: dev 캐시는 기본적으로 `.next/dev`에 출력. `NEXT_TURBOPACK_TRACING=1 next dev`로 `.next/dev/trace-turbopack` 생성해 Next 팀에 이슈 리포트 가능.
+
+## 즉시 해결
+
+```bash
+# .next 폴더(특히 18GB짜리 .next/dev) 삭제
+cd apps/web && rm -rf .next
+```
+→ 삭제 후 dev 메모리 ~1.7GB로 안정.
+
+## 재발 방지 (적용 완료)
+
+`apps/web/scripts/next-dev.ts`에 **자동 정리 가드** 추가 (커밋 `1a2b3c4`):
+
+- `next dev` 시작 전 `.next/dev` 크기를 측정 (임계치 도달 시 조기 종료하는 빠른 계산)
+- **3GB 초과 시 자동 삭제** 후 부팅 → 캐시 속도 이점은 유지, 폭주만 차단
+- 임계치는 `DEV_CACHE_LIMIT_GB` 환경변수로 조정 가능
+
+```
+♻️  Turbopack dev 캐시(.next/dev)가 3GB 초과 — OOM 방지 위해 초기화합니다.
+```
+
+대안(미채택): `experimental.turbopackFileSystemCacheForDev: false`로 캐시 자체를 끄면 절대 안 부풂. 단 세션 간 캐시 재사용 이점(빠른 재시작) 상실.
+
+## 참고 링크
+
+- [Turbopack FileSystem Cache 공식 문서](https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopackFileSystemCache)
+- [vercel/next.js #93896 — Turbopack 과도 메모리 (v16.2.6)](https://github.com/vercel/next.js/issues/93896)
+- Reddit: "Next.js 16 Turbopack dev cache ate 20GB"

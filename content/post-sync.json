@@ -1,0 +1,70 @@
+{
+  "Jira-Confluence 자동화.md": {
+    "slug": "claude-code-jira-confluence-automation",
+    "tags": ["claude-code", "jira", "confluence", "atlassian", "mcp", "automation", "hook"],
+    "category": "ai",
+    "subcategory": "guide"
+  },
+  "다국어 키 양방향 동기화 자동화 회고.md": {
+    "slug": "i18n-sync-spreadsheet-automation",
+    "tags": ["i18n", "automation", "ci", "google-sheets", "sync", "devlog"],
+    "category": "log"
+  },
+  "배포 후 간헐적 404(청크 로드 에러) 자동 복구하기.md": {
+    "slug": "nextjs-deploy-skew-chunk-load-recovery",
+    "tags": ["nextjs", "deploy", "chunk-load-error", "turbopack", "error-boundary", "recovery"],
+    "category": "log"
+  },
+  "코드 리뷰 에이전트 추가하고 리뷰→QA→커밋 파이프라인 만들기.md": {
+    "slug": "claude-code-review-qa-commit-pipeline",
+    "tags": ["claude-code", "subagent", "code-review", "qa", "automation", "workflow"],
+    "category": "ai",
+    "subcategory": "guide"
+  },
+  "프로젝트 전용 QA 에이전트 팀 만들기.md": {
+    "slug": "claude-code-qa-agent-team",
+    "tags": ["claude-code", "subagent", "playwright", "e2e", "qa", "automation"],
+    "category": "ai",
+    "subcategory": "guide"
+  },
+  "휴대폰으로 Claude Code 원격 코딩하기 (Remote Control).md": {
+    "slug": "claude-code-remote-control-mobile",
+    "tags": ["claude-code", "remote-control", "mobile", "workflow", "automation"],
+    "category": "ai",
+    "subcategory": "guide"
+  },
+  "Sentry 소스맵, 업로드는 됐는데 왜 안 풀리나 — 회고.md": {
+    "slug": "sentry-sourcemap-minified-stacktrace-review",
+    "tags": ["sentry", "nextjs", "sourcemap", "turbopack", "debugging", "devlog"],
+    "category": "log",
+    "excerpt": "Sentry 소스맵 업로드는 성공했지만 브라우저 에러가 계속 minified로 보였던 문제를 추적한 회고."
+  },
+  "토큰 인증 — Access vs Refresh.md": {
+    "slug": "access-token-refresh-token-auth-guide",
+    "date": "2026-06-26",
+    "tags": ["auth", "jwt", "access-token", "refresh-token", "redis", "security"],
+    "excerpt": "JWT 기반 로그인에서 access token과 refresh token의 역할, 수명, 저장 방식, 재발급 흐름을 정리한 글."
+  },
+  "Hono RPC 마이그레이션.md": {
+    "slug": "hono-rpc-type-safe-migration",
+    "date": "2026-06-26",
+    "tags": ["hono", "rpc", "typescript", "api", "migration", "frontend"],
+    "excerpt": "Hono RPC로 코드 생성 없이 프론트와 백엔드 타입을 연결하고, 기존 fetch 코드를 점진적으로 옮기는 전략을 정리한 글."
+  },
+  "Redis — 프론트엔드 개발자 관점.md": {
+    "slug": "redis-for-frontend-developers",
+    "date": "2026-06-26",
+    "tags": ["redis", "frontend", "cache", "session", "rate-limit", "backend"],
+    "excerpt": "프론트엔드 개발자가 로그인 유지, 캐시된 응답, 429 에러 같은 현상을 이해하기 위해 알아두면 좋은 Redis 개념을 정리한 글."
+  },
+  "i18n Google Sheet 동기화 (import-export).md": {
+    "slug": "i18n-google-sheet-import-export-sync",
+    "tags": ["i18n", "google-sheets", "automation", "import-export", "localization", "ci"],
+    "excerpt": "다국어 키를 Google Sheet와 JSON 사이에서 import/export로 양방향 동기화하는 구조를 정리한 글."
+  },
+  "Next 16 Turbopack dev 캐시 OOM.md": {
+    "slug": "nextjs-16-turbopack-dev-cache-oom",
+    "tags": ["nextjs", "turbopack", "oom", "wsl", "cache", "debugging"],
+    "excerpt": "Next.js 16 Turbopack dev 서버가 WSL에서 OOM으로 죽던 문제를 dev 캐시 비대화 원인까지 추적한 기록."
+  }
+}
