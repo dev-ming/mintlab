@@ -79,7 +79,9 @@ export function getPostBySlug(slug: string) {
   if (!fs.existsSync(filepath)) return null
   const raw = fs.readFileSync(filepath, 'utf-8')
   const { data, content } = matter(raw)
-  return { meta: { slug, ...data } as PostMeta, content }
+  const wordCount = content.trim().split(/\s+/).filter(Boolean).length
+  const readingTime = Math.max(1, Math.round(wordCount / 200))
+  return { meta: { slug, readingTime, ...data } as PostMeta, content }
 }
 
 export function getAllTags(): string[] {

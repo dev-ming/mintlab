@@ -1,48 +1,121 @@
 # Mintlab
 
-**AI 워크플로우, 도구 리뷰, 프롬프트 템플릿을 직접 만들고 기록하는 아카이브**
+AI tools, developer workflows, debugging notes, and small technical guides.
 
-🔗 **[mintlab-nu.vercel.app](https://mintlab-nu.vercel.app/)**
+Site: [mintlab-nu.vercel.app](https://mintlab-nu.vercel.app/)
 
----
+## Stack
 
-## 소개
+- Next.js 14 App Router
+- Tailwind CSS
+- MDX with `next-mdx-remote`
+- Bun
+- Vercel
 
-Mintlab은 AI 도구와 워크플로우를 실제로 써보고 기록하는 개인 아카이브입니다.
-
-- **가이드** — Claude Code, LLM 활용 패턴, 자동화 워크플로우
-- **도구 리뷰** — AI 도구 실사용 후기와 비교
-- **프롬프트** — 실전에서 검증된 프롬프트 템플릿
-
-## 기술 스택
-
-- [Next.js 14](https://nextjs.org/) (App Router)
-- [Tailwind CSS](https://tailwindcss.com/) + [@tailwindcss/typography](https://tailwindcss.com/docs/typography-plugin)
-- [MDX](https://mdxjs.com/) (next-mdx-remote, remark-gfm, rehype-pretty-code)
-- [Bun](https://bun.sh/)
-- [Vercel](https://vercel.com/)
-
-## 로컬 실행
+## Local Development
 
 ```bash
 bun install
 bun run dev
 ```
 
-## 새 포스트 작성
+Build check:
 
-`content/posts/` 폴더에 `.mdx` 파일 추가:
-
-```mdx
----
-title: "포스트 제목"
-date: "2026-06-11"
-tags: ["workflow", "llm"]
-category: "guide"   # guide | tool | prompt | showcase
-excerpt: "한 줄 요약"
----
-
-본문 내용
+```bash
+bun run build
 ```
 
-HTML 결과물 임베드는 `public/embeds/`에 파일을 넣고 MDX에서 `<EmbedViewer src="/embeds/파일명.html" />` 사용.
+## Post Workflow
+
+Obsidian is the source of truth for posts.
+
+Default source directory:
+
+```text
+C:\Users\jenna\jenna-coding\Obsidian\Archive
+```
+
+Write posts in the matching category folder:
+
+```text
+Archive\
+  guide\
+  ai\
+    guide\
+    tool\
+    prompt\
+    showcase\
+  review\
+  log\
+```
+
+The folder decides the post category:
+
+```text
+Archive\guide\*.md       -> category: "guide"
+Archive\review\*.md      -> category: "review"
+Archive\log\*.md         -> category: "log"
+Archive\ai\tool\*.md     -> category: "ai", subcategory: "tool"
+Archive\ai\prompt\*.md   -> category: "ai", subcategory: "prompt"
+```
+
+## Publishing A Post
+
+Add the post metadata to `content/post-sync.json`:
+
+```json
+{
+  "Example Post.md": {
+    "slug": "example-post",
+    "tags": ["nextjs", "debugging"],
+    "excerpt": "Short summary shown in lists and metadata."
+  }
+}
+```
+
+Then sync:
+
+```bash
+bun run sync:posts
+```
+
+The sync script writes generated MDX files to:
+
+```text
+content/posts/
+```
+
+Before pushing:
+
+```bash
+bun run sync:posts
+bun run build
+```
+
+## Sync Rules
+
+- File names in `Archive` must be unique.
+- Slugs in `content/post-sync.json` must be unique.
+- `**bold**` markers are stripped from synced post bodies outside code blocks.
+- If a post has no `> 작성일: YYYY-MM-DD` line, add `date` in `content/post-sync.json`.
+- Obsidian wiki links should be converted to normal markdown links before publishing.
+
+Example:
+
+```md
+[토큰 인증 — Access vs Refresh](/posts/access-token-refresh-token-auth-guide)
+```
+
+## Embeds
+
+Put static HTML embeds in:
+
+```text
+public/embeds/
+```
+
+Use them in MDX with:
+
+```mdx
+<EmbedViewer src="/embeds/example.html" />
+```
