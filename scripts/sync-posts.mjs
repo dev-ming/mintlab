@@ -38,6 +38,16 @@ function stripObsidianHeader(markdown) {
   return body.trim()
 }
 
+function stripEmphasis(markdown) {
+  return markdown
+    .split(/(```[\s\S]*?```)/g)
+    .map((part) => {
+      if (part.startsWith('```')) return part
+      return part.replace(/\*\*([^*\n][\s\S]*?[^*\n])\*\*/g, '$1').replace(/\*\*/g, '')
+    })
+    .join('')
+}
+
 function plainText(markdown) {
   return markdown
     .replace(/```[\s\S]*?```/g, ' ')
@@ -85,7 +95,7 @@ function renderMdx(filename, raw, meta) {
   const markdown = normalizeMarkdown(raw)
   const title = meta.title ?? extractTitle(markdown, filename)
   const date = extractDate(markdown, meta)
-  const body = stripObsidianHeader(markdown)
+  const body = stripEmphasis(stripObsidianHeader(markdown))
   const excerpt = inferExcerpt(body, meta)
 
   const lines = [
