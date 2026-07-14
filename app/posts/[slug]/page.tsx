@@ -6,8 +6,10 @@ import CopyCode from '@/components/CopyCode'
 import SeriesNav from '@/components/SeriesNav'
 import TableOfContents from '@/components/TableOfContents'
 import rehypePrettyCode from 'rehype-pretty-code'
+import rehypeKatex from 'rehype-katex'
 import rehypeSlug from 'rehype-slug'
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
 import type { Metadata } from 'next'
 
 const components = {
@@ -17,9 +19,10 @@ const components = {
 
 const mdxOptions = {
   mdxOptions: {
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: [remarkGfm, remarkMath],
     rehypePlugins: [
       rehypeSlug,
+      rehypeKatex,
       [rehypePrettyCode, { theme: 'github-dark-dimmed', keepBackground: false }],
     ],
   },

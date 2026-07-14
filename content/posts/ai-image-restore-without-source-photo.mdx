@@ -175,9 +175,10 @@ attended_text = weights @ V
 
 수식으로는 흔히 다음처럼 쓴다.
 
-```text
-Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V
-```
+$$
+\operatorname{Attention}(Q, K, V)
+= \operatorname{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+$$
 
 이 연결 덕분에 이미지의 서로 다른 공간적 특징이 `photo`, `damaged`, `eyes closed`, `strange` 같은 텍스트 조건을 서로 다른 강도로 참고할 수 있다. “특정 픽셀이 특정 단어를 읽는다”는 표현은 이해를 돕는 비유이며, 실제 계산은 여러 해상도·헤드·레이어에 분산된다.
 

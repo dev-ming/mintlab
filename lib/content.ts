@@ -35,9 +35,12 @@ function slugify(text: string): string {
 
 export function extractHeadings(content: string): Heading[] {
   const headings: Heading[] = []
+  const contentWithoutCode = content
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/~~~[\s\S]*?~~~/g, '')
   const re = /^(#{1,3})\s+(.+)$/gm
   let match
-  while ((match = re.exec(content)) !== null) {
+  while ((match = re.exec(contentWithoutCode)) !== null) {
     const raw = match[2].trim()
     // 마크다운 인라인 서식 제거
     const text = raw
