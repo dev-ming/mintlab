@@ -10,7 +10,7 @@ const outputDir = path.join(repoRoot, 'content', 'posts')
 
 const requiredMeta = ['slug', 'tags']
 const categories = new Set(['guide', 'ai', 'review', 'log'])
-const aiSubcategories = new Set(['guide', 'tool', 'prompt', 'showcase'])
+const aiSubcategories = new Set(['guide', 'concepts'])
 
 function readUtf8(filePath) {
   return fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '')

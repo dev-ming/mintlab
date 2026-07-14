@@ -42,9 +42,7 @@ Archive\
   guide\
   ai\
     guide\
-    tool\
-    prompt\
-    showcase\
+    concepts\
   review\
   log\
 ```
@@ -55,8 +53,8 @@ The folder decides the post category:
 Archive\guide\*.md       -> category: "guide"
 Archive\review\*.md      -> category: "review"
 Archive\log\*.md         -> category: "log"
-Archive\ai\tool\*.md     -> category: "ai", subcategory: "tool"
-Archive\ai\prompt\*.md   -> category: "ai", subcategory: "prompt"
+Archive\ai\guide\*.md    -> category: "ai", subcategory: "guide"
+Archive\ai\concepts\*.md -> category: "ai", subcategory: "concepts"
 ```
 
 ## Publishing A Post

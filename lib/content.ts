@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 
-export type AiSubcategory = 'guide' | 'tool' | 'prompt' | 'showcase'
+export type AiSubcategory = 'guide' | 'concepts'
 
 export type PostMeta = {
   slug: string

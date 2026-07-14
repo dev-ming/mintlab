@@ -76,7 +76,7 @@
   "사진도 없는데 AI에게 복원해줘라고 하면 왜 무서운 이미지가 나올까.md": {
     "slug": "ai-image-restore-without-source-photo",
     "tags": ["ai", "image-generation", "diffusion", "prompt", "cross-attention", "vae"],
-    "subcategory": "guide",
+    "subcategory": "concepts",
     "excerpt": "입력 이미지 없이 AI에게 사진 복원을 요청하면 왜 기괴한 새 이미지가 생성될 수 있는지 이미지 생성 파이프라인 관점에서 풀어본 글."
   }
 }

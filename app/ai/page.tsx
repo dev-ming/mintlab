@@ -6,9 +6,7 @@ export const metadata: Metadata = { title: 'AI' }
 
 const SUBCATEGORY_LABELS: Record<string, string> = {
   guide: '가이드',
-  tool: '도구',
-  prompt: '프롬프트',
-  showcase: '결과물',
+  concepts: '개념',
 }
 
 export default function AiPage({
@@ -26,13 +24,13 @@ export default function AiPage({
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">AI</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm">
-          AI 도구 활용, 워크플로우 자동화, 프롬프트 엔지니어링
+          AI 활용 가이드와 모델, 생성 원리를 기록합니다.
         </p>
       </div>
 
       {/* 서브카테고리 탭 */}
       <div className="flex gap-2 flex-wrap mb-6">
-        {(['', 'guide', 'tool', 'prompt', 'showcase'] as const).map((sub) => {
+        {(['', 'guide', 'concepts'] as const).map((sub) => {
           const label = sub === '' ? '전체' : SUBCATEGORY_LABELS[sub]
           const active = (searchParams.sub ?? '') === sub
           return (
