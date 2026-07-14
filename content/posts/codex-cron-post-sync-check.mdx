@@ -1,0 +1,133 @@
+---
+title: "Codex 자동화 cron으로 글 동기화 체크하기"
+date: "2026-07-14"
+tags: ["codex","automation","cron","obsidian","workflow","mintlab"]
+category: "ai"
+subcategory: "guide"
+excerpt: "Codex 앱의 cron 자동화로 Obsidian Archive 글 동기화 상태를 주기적으로 점검하는 운영 방식을 정리한 글."
+---
+
+Codex 앱 안에도 스케줄러처럼 주기적으로 작업을 깨우는 자동화 기능이 있다. OS의 Windows 작업 스케줄러나 리눅스 crontab을 직접 만지는 방식은 아니고, Codex가 지정한 workspace에서 정해진 시간마다 작업 프롬프트를 실행하는 구조다.
+
+이번에는 이걸 Mintlab 글 관리 흐름에 붙일 수 있는지 확인했다. 결론부터 말하면, 자동 업로드까지 한 번에 맡기기보다는 새 글 감지와 동기화 필요 여부를 알려주는 용도로 쓰는 게 안전해 보인다.
+
+---
+
+## 배경
+
+Mintlab 글은 Obsidian을 원본으로 두고, `bun run sync:posts`로 `content/posts/*.mdx`를 생성한다.
+
+현재 흐름은 수동이다.
+
+```powershell
+bun run sync:posts
+bun run build
+```
+
+새 글이면 `content/post-sync.json`에 slug, tags, excerpt 같은 매핑도 추가해야 한다.
+
+이 방식은 명확하지만, 문제는 새 글을 써두고 동기화를 까먹기 쉽다는 것. 그래서 “Codex가 주기적으로 Archive를 보고 알려줄 수 있나?”를 확인했다.
+
+---
+
+## Codex cron이란
+
+Codex 앱의 자동화에는 크게 두 종류가 있다.
+
+| 종류 | 용도 |
+|---|---|
+| cron 자동화 | workspace에서 주기적으로 작업 실행 |
+| heartbeat 자동화 | 현재 대화 스레드를 나중에 다시 깨움 |
+
+Mintlab에는 cron 자동화가 더 잘 맞는다.
+
+예를 들면 이런 식이다.
+
+```text
+매일 오전 9시에 mintlab workspace에서 실행:
+Obsidian Archive에 새 글이 있는지 확인하고,
+post-sync.json에 없는 글이 있으면 목록으로 알려줘.
+동기화와 빌드는 검증만 하고, 커밋/푸시는 하지 마.
+```
+
+즉 Codex cron은 운영체제 cron이 아니라, Codex 앱이 자체적으로 작업을 예약 실행하는 기능이다.
+
+---
+
+## Mintlab에 붙이면 좋은 방식
+
+자동화가 할 일은 이 정도가 적당하다.
+
+1. `C:\Users\jenna\jenna-coding\Obsidian\Archive` 아래 `.md` 파일 목록 확인
+2. `content/post-sync.json`에 없는 파일 찾기
+3. 중복 파일명이나 중복 slug가 있는지 확인
+4. `bun run sync:posts` 실행
+5. `bun run build` 실행
+6. 결과를 보고
+
+커밋과 푸시는 자동화하지 않는 편이 낫다. 글은 URL, 태그, 요약이 같이 얽혀 있어서 사람이 마지막으로 보는 단계가 필요하다.
+
+---
+
+## 왜 완전 자동 업로드는 애매한가
+
+새 글을 발견했다고 바로 사이트에 올리려면 세 가지를 정해야 한다.
+
+- slug: URL이 되므로 한 번 정하면 바꾸기 어렵다.
+- tags: 글 목록과 탐색에 영향을 준다.
+- excerpt: 메타 설명과 카드 요약에 보인다.
+
+이걸 기계가 임의로 만들면 편하긴 하지만, 나중에 URL이 어색하거나 태그가 난잡해질 수 있다.
+
+그래서 좋은 타협점은 “자동 감지 + 보고”다.
+
+```text
+새 글 발견:
+- Archive\guide\Redis — 프론트엔드 개발자 관점.md
+- Archive\log\Next 16 Turbopack dev 캐시 OOM.md
+
+아직 post-sync.json 매핑 없음.
+```
+
+여기까지만 자동화가 알려주고, 실제 매핑 추가와 푸시는 필요할 때 Codex에게 맡기는 흐름이 좋다.
+
+---
+
+## 내가 쓸 운영 방식
+
+평소에는 Obsidian에 글을 쓴다.
+
+```text
+Archive\guide\새 글.md
+Archive\ai\guide\새 글.md
+Archive\log\새 글.md
+```
+
+Codex cron은 하루 한 번 정도 새 글과 동기화 상태를 확인한다.
+
+문제가 있으면 보고만 한다.
+
+```text
+새 글 1개 발견
+매핑 없음: Hono RPC 마이그레이션.md
+build 통과
+푸시는 하지 않음
+```
+
+그다음 필요할 때 이렇게 말하면 된다.
+
+```text
+저 새 글 매핑 잡고 올려줘
+```
+
+그러면 Codex가 `post-sync.json`을 수정하고, `bun run sync:posts`, `bun run build`, 커밋, 푸시까지 이어서 처리한다.
+
+---
+
+## 정리
+
+Codex cron은 글 발행을 완전히 자동화하기보다는, 놓치기 쉬운 상태 점검을 자동화하는 데 어울린다.
+
+Mintlab 기준으로는 “Obsidian Archive 감시자” 역할이 좋다. 새 글이 있는지, 매핑이 빠졌는지, 동기화가 깨졌는지 알려주고, 실제 발행은 내가 명령했을 때 진행한다.
+
+이 정도 거리가 딱 좋다. 자동화는 귀찮은 확인을 대신하고, 공개되는 글의 URL과 맥락은 사람이 잡는다.
