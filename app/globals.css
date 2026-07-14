@@ -23,6 +23,15 @@
   scroll-margin-top: 96px;
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* 테이블 */
 .prose table {
   @apply w-full text-sm;

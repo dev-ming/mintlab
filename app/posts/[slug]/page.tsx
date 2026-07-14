@@ -98,8 +98,14 @@ export default function PostPage({ params }: { params: { slug: string } }) {
 
       {/* 목차 사이드바 */}
       {headings.length > 0 && (
-        <aside className="sticky top-20 hidden max-h-[calc(100vh-6rem)] w-48 flex-shrink-0 self-start overflow-y-auto pb-4 lg:block">
-          <TableOfContents headings={headings} />
+        <aside className="sticky top-20 hidden w-48 flex-shrink-0 self-start lg:block">
+          <div className="relative max-h-[calc(100vh-6rem)] overflow-hidden">
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-4 bg-gradient-to-b from-white dark:from-[#0b0f15] to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6 bg-gradient-to-t from-white dark:from-[#0b0f15] to-transparent" />
+            <div className="no-scrollbar max-h-[calc(100vh-6rem)] overflow-y-auto py-4">
+              <TableOfContents headings={headings} />
+            </div>
+          </div>
         </aside>
       )}
     </div>
