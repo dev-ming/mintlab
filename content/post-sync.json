@@ -84,5 +84,11 @@
     "tags": ["auth", "session", "refresh-token", "http-only-cookie", "network-error", "retrospective"],
     "category": "log",
     "excerpt": "네트워크 순단과 서버 장애를 인증 만료로 오해해 사용자를 로그아웃시키던 문제를 분석하고, 토큰 저장소와 세션 복구 전략을 재설계한 회고."
+  },
+  "빌드 때 굳어버린 사이트맵 — 회고.md": {
+    "slug": "nextjs-sitemap-build-time-failure-retrospective",
+    "tags": ["nextjs", "sitemap", "serverless", "isr", "networking", "retrospective"],
+    "category": "log",
+    "excerpt": "빌드 시점의 일시적인 API 실패가 빈 사이트맵으로 굳어진 원인을 추적하고, 동적 생성과 관측 가능한 폴백으로 개선한 회고."
   }
 }
