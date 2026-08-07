@@ -47,14 +47,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="border-t border-slate-200 dark:border-white/[0.06] mt-20">
             <div className="max-w-4xl mx-auto px-6 py-8 text-xs text-slate-400 dark:text-slate-600 flex items-center justify-between">
               <span>Mintlab — 개발 기록 아카이브</span>
-              <a
-                href="https://github.com/dev-ming"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-slate-400 hover:text-mint-500 dark:hover:text-mint-400 transition-colors"
-              >
-                @dev-ming
-              </a>
+              <div className="flex items-center gap-4">
+                <a
+                  href="https://buymeacoffee.com/mingee"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-400 transition-colors hover:text-mint-500 dark:hover:text-mint-400"
+                >
+                  ☕ 커피 한 잔
+                </a>
+                <a
+                  href="https://github.com/dev-ming"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-400 hover:text-mint-500 dark:hover:text-mint-400 transition-colors"
+                >
+                  @dev-ming
+                </a>
+              </div>
             </div>
           </footer>
         </Providers>

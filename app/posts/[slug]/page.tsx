@@ -14,6 +14,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SITE_CONFIG } from '@/lib/site'
 import ShareButton from '@/components/ShareButton'
+import { Coffee } from 'lucide-react'
 
 const components = {
   EmbedViewer,
@@ -164,6 +165,26 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             options={mdxOptions as any}
           />
         </div>
+
+        <aside className="mt-14 rounded-xl border border-mint-500/20 bg-mint-500/[0.06] px-5 py-5 dark:border-mint-400/15 dark:bg-mint-400/[0.05]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">글이 도움이 됐나요?</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                문제를 해결하는 데 도움이 됐다면 커피 한 잔으로 응원할 수 있어요.
+              </p>
+            </div>
+            <a
+              href="https://buymeacoffee.com/mingee"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-mint-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-mint-600 dark:bg-mint-400 dark:text-slate-950 dark:hover:bg-mint-300"
+            >
+              <Coffee size={16} aria-hidden="true" />
+              커피 한 잔 보내기
+            </a>
+          </div>
+        </aside>
       </article>
 
       {/* 목차 사이드바 */}
