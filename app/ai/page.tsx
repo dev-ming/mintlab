@@ -1,8 +1,22 @@
 import { getAllPosts } from '@/lib/content'
 import PostCard from '@/components/PostCard'
 import type { Metadata } from 'next'
+import { createPageMetadata } from '@/lib/site'
 
-export const metadata: Metadata = { title: 'AI' }
+export function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { sub?: string }
+}): Metadata {
+  return {
+    ...createPageMetadata(
+      'AI 활용 가이드',
+      'Claude Code, Codex, LLM 지식관리와 이미지 생성 원리 등 AI 활용법과 자동화 경험을 정리한 가이드.',
+      '/ai',
+    ),
+    robots: searchParams.sub ? { index: false, follow: true } : undefined,
+  }
+}
 
 const SUBCATEGORY_LABELS: Record<string, string> = {
   guide: '가이드',

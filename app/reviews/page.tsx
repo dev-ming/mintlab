@@ -1,8 +1,13 @@
 import { getPostsByCategory } from '@/lib/content'
 import PostCard from '@/components/PostCard'
 import type { Metadata } from 'next'
+import { createPageMetadata } from '@/lib/site'
 
-export const metadata: Metadata = { title: '리뷰' }
+export const metadata: Metadata = createPageMetadata(
+  '개발 도구 리뷰',
+  '직접 사용한 개발 도구, 라이브러리, 서비스의 문제 해결 과정과 적용 결과를 기록한 리뷰.',
+  '/reviews',
+)
 
 export default function ReviewsPage() {
   const posts = getPostsByCategory('review')

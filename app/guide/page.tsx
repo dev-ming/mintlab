@@ -1,8 +1,13 @@
 import { getPostsByCategory } from '@/lib/content'
 import PostCard from '@/components/PostCard'
 import type { Metadata } from 'next'
+import { createPageMetadata } from '@/lib/site'
 
-export const metadata: Metadata = { title: '가이드' }
+export const metadata: Metadata = createPageMetadata(
+  '개발 가이드',
+  '직접 적용해 본 프론트엔드, 인증, API, 데이터 처리 기술을 단계별로 정리한 실전 개발 가이드.',
+  '/guide',
+)
 
 export default function GuidePage() {
   const posts = getPostsByCategory('guide')

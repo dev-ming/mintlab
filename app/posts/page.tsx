@@ -2,8 +2,24 @@ import { getAllPosts, getAllTags } from '@/lib/content'
 import PostList from '@/components/PostList'
 import TagFilter from '@/components/TagFilter'
 import type { Metadata } from 'next'
+import { createPageMetadata } from '@/lib/site'
 
-export const metadata: Metadata = { title: '전체 글' }
+export function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { tag?: string; category?: string }
+}): Metadata {
+  const isFiltered = Boolean(searchParams.tag || searchParams.category)
+
+  return {
+    ...createPageMetadata(
+      '전체 개발 글',
+      'Next.js, AI 자동화, 인증, 배포, 디버깅 등 실제 개발 문제와 해결 과정을 주제별로 모은 글 목록.',
+      '/posts',
+    ),
+    robots: isFiltered ? { index: false, follow: true } : undefined,
+  }
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   guide: '가이드',

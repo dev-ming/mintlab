@@ -1,8 +1,13 @@
 import { getPostsByCategory } from '@/lib/content'
 import PostCard from '@/components/PostCard'
 import type { Metadata } from 'next'
+import { createPageMetadata } from '@/lib/site'
 
-export const metadata: Metadata = { title: '로그' }
+export const metadata: Metadata = createPageMetadata(
+  '개발 로그',
+  'Next.js와 프론트엔드 개발 중 만난 장애, 디버깅 과정, 배포 이슈와 해결 방법을 기록한 개발 로그.',
+  '/logs',
+)
 
 export default function LogsPage() {
   const posts = getPostsByCategory('log')

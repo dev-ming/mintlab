@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Cpu } from 'lucide-react'
 import Search from '@/components/Search'
 import ThemeToggle from '@/components/ThemeToggle'
 import type { PostMeta } from '@/lib/content'
@@ -27,7 +26,16 @@ export default function Header({ posts }: Props) {
       <div className="mx-auto flex h-14 max-w-4xl items-center gap-4 px-6 sm:gap-6">
         <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-slate-900 transition-colors hover:text-mint-500 dark:text-slate-100 dark:hover:text-mint-400">
           <span className="grid size-6 place-items-center rounded-md border border-mint-500/20 bg-mint-500/10 text-mint-500 dark:border-mint-400/20 dark:bg-mint-400/10 dark:text-mint-400">
-            <Cpu size={14} />
+            <svg viewBox="0 0 32 32" className="size-4" fill="none" aria-hidden="true">
+              <path
+                d="M4 24V8l8 8 8-8v16h8"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="28" cy="24" r="2" fill="currentColor" />
+            </svg>
           </span>
           Mintlab
         </Link>
