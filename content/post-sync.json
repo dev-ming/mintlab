@@ -3,7 +3,8 @@
     "slug": "claude-code-jira-confluence-automation",
     "tags": ["claude-code", "jira", "confluence", "atlassian", "mcp", "automation", "hook"],
     "category": "ai",
-    "subcategory": "guide"
+    "subcategory": "guide",
+    "excerpt": "Claude Code와 Atlassian MCP를 연결해 Jira 이슈 상태 변경 시 Confluence 업무일지를 자동으로 갱신하는 방법을 정리한 가이드."
   },
   "다국어 키 양방향 동기화 자동화 회고.md": {
     "slug": "i18n-sync-spreadsheet-automation",
@@ -13,25 +14,29 @@
   "배포 후 간헐적 404(청크 로드 에러) 자동 복구하기.md": {
     "slug": "nextjs-deploy-skew-chunk-load-recovery",
     "tags": ["nextjs", "deploy", "chunk-load-error", "turbopack", "error-boundary", "recovery"],
-    "category": "log"
+    "category": "log",
+    "excerpt": "Next.js 배포 버전 불일치로 발생하는 청크 404와 ChunkLoadError의 원인을 분석하고 클라이언트 자동 복구 로직을 적용한 기록."
   },
   "코드 리뷰 에이전트 추가하고 리뷰→QA→커밋 파이프라인 만들기.md": {
     "slug": "claude-code-review-qa-commit-pipeline",
     "tags": ["claude-code", "subagent", "code-review", "qa", "automation", "workflow"],
     "category": "ai",
-    "subcategory": "guide"
+    "subcategory": "guide",
+    "excerpt": "코드 리뷰와 QA 에이전트를 연결해 리뷰, 수정, 테스트, 커밋까지 이어지는 Claude Code 자동화 파이프라인 구축 방법."
   },
   "프로젝트 전용 QA 에이전트 팀 만들기.md": {
     "slug": "claude-code-qa-agent-team",
     "tags": ["claude-code", "subagent", "playwright", "e2e", "qa", "automation"],
     "category": "ai",
-    "subcategory": "guide"
+    "subcategory": "guide",
+    "excerpt": "Claude Code 서브에이전트와 Playwright를 조합해 프로젝트 전용 QA 역할, 테스트 절차, 결과 보고 체계를 구성하는 방법."
   },
   "휴대폰으로 Claude Code 원격 코딩하기 (Remote Control).md": {
     "slug": "claude-code-remote-control-mobile",
     "tags": ["claude-code", "remote-control", "mobile", "workflow", "automation"],
     "category": "ai",
-    "subcategory": "guide"
+    "subcategory": "guide",
+    "excerpt": "Claude Code Remote Control을 사용해 휴대폰에서 실행 중인 코딩 세션을 확인하고 지시하는 설정 방법과 활용 흐름."
   },
   "Sentry 소스맵, 업로드는 됐는데 왜 안 풀리나 — 회고.md": {
     "slug": "sentry-sourcemap-minified-stacktrace-review",

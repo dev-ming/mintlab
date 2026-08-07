@@ -48,6 +48,19 @@ function stripEmphasis(markdown) {
     .join('')
 }
 
+function convertWikilinks(markdown, wikilinkMap) {
+  return markdown.replace(
+    /(?<!!)\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g,
+    (_, rawTarget, rawLabel) => {
+      const target = rawTarget.trim()
+      const label = rawLabel?.trim() || target
+      const slug = wikilinkMap.get(target)
+
+      return slug ? `[${label}](/posts/${slug})` : label
+    },
+  )
+}
+
 function plainText(markdown) {
   return markdown
     .replace(/```[\s\S]*?```/g, ' ')
@@ -91,11 +104,11 @@ function mergeMeta(filename, configMeta, inferredMeta) {
   return meta
 }
 
-function renderMdx(filename, raw, meta) {
+function renderMdx(filename, raw, meta, wikilinkMap) {
   const markdown = normalizeMarkdown(raw)
   const title = meta.title ?? extractTitle(markdown, filename)
   const date = extractDate(markdown, meta)
-  const body = stripEmphasis(stripObsidianHeader(markdown))
+  const body = convertWikilinks(stripEmphasis(stripObsidianHeader(markdown)), wikilinkMap)
   const excerpt = inferExcerpt(body, meta)
 
   const lines = [
@@ -221,6 +234,9 @@ function main() {
 
   const config = JSON.parse(readUtf8(configPath))
   assertNoDuplicateSlugs(config)
+  const wikilinkMap = new Map(
+    Object.entries(config).map(([filename, meta]) => [filename.replace(/\.md$/i, ''), meta.slug]),
+  )
 
   const sourceFiles = getSourceFiles()
   assertNoDuplicateSourceFilenames(sourceFiles)
@@ -241,7 +257,7 @@ function main() {
 
     const meta = mergeMeta(filename, configMeta, inferredMeta)
     const outputPath = path.join(outputDir, `${meta.slug}.mdx`)
-    const nextContent = renderMdx(filename, readUtf8(sourcePath), meta)
+    const nextContent = renderMdx(filename, readUtf8(sourcePath), meta, wikilinkMap)
     const previousContent = fs.existsSync(outputPath) ? readUtf8(outputPath) : null
 
     if (previousContent === nextContent) {
