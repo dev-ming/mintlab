@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   authors: [{ name: SITE_CONFIG.author, url: 'https://github.com/dev-ming' }],
   creator: SITE_CONFIG.author,
   publisher: SITE_CONFIG.name,
+  verification: { google: 'dF9NgQPQOrvhDX13i3K5es0zEg4qa0skf6PQXMuVwhM' },
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
