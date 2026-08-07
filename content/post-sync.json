@@ -85,6 +85,13 @@
     "category": "log",
     "excerpt": "네트워크 순단과 서버 장애를 인증 만료로 오해해 사용자를 로그아웃시키던 문제를 분석하고, 토큰 저장소와 세션 복구 전략을 재설계한 회고."
   },
+  "GA4 사용자 속성(user properties) — 설정법과 동작 원리.md": {
+    "slug": "ga4-user-properties-setup-and-behavior",
+    "date": "2026-08-07",
+    "tags": ["ga4", "analytics", "user-properties", "gtag", "custom-dimensions", "privacy"],
+    "category": "guide",
+    "excerpt": "GA4 사용자 속성과 이벤트 매개변수의 차이부터 설정·전송 시점, 맞춤 측정기준 등록, 개인정보와 검증 시 주의점까지 정리한 가이드."
+  },
   "빌드 때 굳어버린 사이트맵 — 회고.md": {
     "slug": "nextjs-sitemap-build-time-failure-retrospective",
     "tags": ["nextjs", "sitemap", "serverless", "isr", "networking", "retrospective"],
