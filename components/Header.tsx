@@ -24,20 +24,11 @@ export default function Header({ posts }: Props) {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-slate-50/90 backdrop-blur-md dark:border-white/[0.06] dark:bg-[#12151c]/90">
       <div className="mx-auto flex h-14 max-w-4xl items-center gap-4 px-6 sm:gap-6">
-        <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-slate-900 transition-colors hover:text-mint-500 dark:text-slate-100 dark:hover:text-mint-400">
-          <span className="grid size-6 place-items-center rounded-md border border-mint-500/20 bg-mint-500/10 text-mint-500 dark:border-mint-400/20 dark:bg-mint-400/10 dark:text-mint-400">
-            <svg viewBox="0 0 32 32" className="size-4" fill="none" aria-hidden="true">
-              <path
-                d="M4 24V8l8 8 8-8v16h8"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="28" cy="24" r="2" fill="currentColor" />
-            </svg>
-          </span>
-          Mintlab
+        <Link
+          href="/"
+          className="flex items-baseline gap-1 text-base font-bold tracking-[-0.03em] text-slate-950 transition-colors hover:text-mint-600 dark:text-slate-100 dark:hover:text-mint-400"
+        >
+          Mintlab<span className="text-mint-500">.</span>
         </Link>
 
         <nav className="flex min-w-0 flex-1 gap-1 overflow-visible">

@@ -3,6 +3,7 @@ node_modules/
 
 # next.js
 .next/
+.next-dev/
 out/
 
 # env
@@ -13,3 +14,4 @@ out/
 # misc
 .DS_Store
 *.pem
+*.tsbuildinfo
