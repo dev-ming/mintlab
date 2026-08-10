@@ -97,6 +97,13 @@
     "category": "guide",
     "excerpt": "GA4 사용자 속성과 이벤트 매개변수의 차이부터 설정·전송 시점, 맞춤 측정기준 등록, 개인정보와 검증 시 주의점까지 정리한 가이드."
   },
+  "국기 이모지가 Windows에서 글자로 보이는 이유.md": {
+    "slug": "windows-country-flag-emoji-font-rendering",
+    "date": "2026-08-10",
+    "tags": ["emoji", "windows", "unicode", "font", "css", "polyfill"],
+    "category": "guide",
+    "excerpt": "Windows에서 국기 이모지가 알파벳 두 글자로 보이는 원인을 유니코드와 폰트 렌더링 관점에서 분석하고, 전용 폰트와 unicode-range로 해결하는 방법을 정리한 가이드."
+  },
   "빌드 때 굳어버린 사이트맵 — 회고.md": {
     "slug": "nextjs-sitemap-build-time-failure-retrospective",
     "tags": ["nextjs", "sitemap", "serverless", "isr", "networking", "retrospective"],
