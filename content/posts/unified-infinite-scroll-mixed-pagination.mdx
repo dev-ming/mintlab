@@ -1,0 +1,299 @@
+---
+title: "페이징 방식이 제각각인 API를 하나의 무한 스크롤로 묶기"
+date: "2026-08-10"
+tags: ["react","tanstack-query","infinite-scroll","pagination","cursor","offset"]
+category: "guide"
+excerpt: "커서와 오프셋 페이징이 섞인 여러 API를 불투명 페이지 토큰으로 추상화해 하나의 무한 스크롤 컴포넌트로 통합한 구현 기록."
+---
+
+"댓글이 50개를 넘으면 그 뒤로는 볼 수가 없다"는 제보가 들어왔다. 더보기 버튼도 사라진다고 했다.
+
+파보니 화면 8곳이 같은 공용 컴포넌트를 쓰는데 서버는 화면마다 페이징 방식이 달랐다. 하나는 커서, 일곱은 오프셋. "그럼 서버부터 통일해야 하나"로 갔다가, 결국 서버를 한 줄도 안 고치고 8개 화면을 다 살렸다.
+
+그 과정과, 무한 스크롤을 붙일 때 밟은 함정 네 개를 남긴다.
+
+---
+
+## 1. "더보기"가 서버 요청이 아니었다
+
+먼저 증상의 정체.
+
+```ts
+const { data } = useQuery({
+  queryKey: [...keyBase, sort],
+  queryFn: () => api.fetchComments(sort),   // ← limit=50 고정, 1회
+});
+
+const comments = data?.items ?? [];
+const totalFlattened = comments.reduce((s, c) => s + 1 + (c.replyCount ?? 0), 0);
+const hasMore = totalFlattened > visibleCount;   // ← 로드된 배열만 본다
+```
+
+화면의 "더보기"는 이미 받아둔 50개를 10개씩 끊어 순차 노출하는 클라이언트 처리였다. 서버에서 다음 페이지를 받아오는 동작이 아니었다.
+
+그래서 두 가지가 동시에 벌어진다.
+
+1. 51번째부터는 클라이언트에 아예 전달되지 않는다 → 열람 불가
+2. `hasMore`를 로드된 배열 기준으로 판단한다 → 50개를 다 보면 서버에 더 있어도 버튼이 사라진다
+
+핵심은 이거다. 서버의 `limit` 상한은 "한 요청당 최대 개수"지 "총량"이 아니다. 그런데 프론트가 2페이지를 절대 요청하지 않으니, 페이지 상한이 그대로 전체 상한으로 굳어버렸다. 서버는 죄가 없었다.
+
+---
+
+## 2. 서버를 열어보니 방식이 갈려 있었다
+
+백엔드가 같은 저장소에 있어서 8개 엔드포인트를 전부 읽었다.
+
+| 엔드포인트 그룹 | 페이징 | 응답 | limit 상한 |
+| --- | --- | --- | --- |
+| A (1종) | cursor | `items, nextCursor, totalCount` | 50 |
+| B (3종) | offset | `items, total` | 50~100 |
+| C (4종) | offset | `items, total, hasMore` | 50~100 |
+
+A만 커서였다. 그리고 A는 이미 `nextCursor`를 내려주고 있었는데 프론트가 받아서 버리고 있었다.
+
+```ts
+fetchComments: (sort) =>
+  fetchAComments({ id, limit: 50, sort })
+    .then((p) => ({ items: p.items, total: p.totalCount })),
+    //                                    ↑ nextCursor 증발
+```
+
+이렇게 된 이유는 공용 인터페이스에 커서를 담을 자리가 없어서였다.
+
+```ts
+fetchComments(sort): Promise<{ items: CommentItem[]; total: number }>
+//                            ↑ 다음 페이지를 가리킬 필드가 없음
+```
+
+`limit` 상한이 화면마다 다른 것도 설계 의도가 아니라 그냥 각자 짜여서였다. 심지어 한 화면은 프론트가 `limit=100`을 보내는데 서버가 `Math.min(limit, 50)`으로 자르고 있었다. 아무도 몰랐다.
+
+---
+
+## 3. 통일할 대상을 잘못 고르면 일이 커진다
+
+처음엔 "그럼 전부 커서로 통일하자" 또는 "전부 오프셋으로" 를 생각했다. 둘 다 나쁜 선택이다.
+
+전부 오프셋으로는 후퇴다. 오프셋 페이징은 목록이 실시간으로 바뀌면 페이지 경계가 밀려서 같은 항목이 두 번 나오거나 하나가 통째로 건너뛰어진다. 댓글은 보는 중에도 계속 달리니 실제로 발생한다. 이미 제대로 하고 있던 A를 망가진 쪽에 맞추는 꼴이다.
+
+전부 커서로는 방향은 맞지만 서버 7종을 고쳐야 한다. 지금 당장 막힌 열람을 푸는 데는 과하다.
+
+빠져나온 지점은 질문을 바꾼 것이었다.
+
+> 통일해야 할 건 페이징 방식이 아니라 "다음 페이지를 가리키는 값"의 취급 방식이다.
+
+공용 컴포넌트는 그 값이 커서 문자열인지 오프셋 숫자인지 알 필요가 없다. 받아서 그대로 돌려주기만 하면 된다.
+
+---
+
+## 4. 불투명 페이지 토큰
+
+```ts
+/**
+ * `nextPageParam`은 "다음 페이지를 달라고 할 때 그대로 돌려줄 값"이며
+ * 이 컴포넌트는 값의 정체를 해석하지 않는다. null이면 마지막 페이지.
+ */
+export type CommentPage = {
+  items: CommentItem[];
+  total: number;
+  nextPageParam: unknown | null;
+};
+
+export type CommentSectionApi = {
+  fetchComments(sort: SortKey, pageParam?: unknown): Promise<CommentPage>;
+  // ...
+};
+```
+
+`unknown`이 핵심이다. `string | number`로 좁히고 싶은 유혹이 있는데, 좁히는 순간 "세 번째 방식"이 나타났을 때 인터페이스를 또 고쳐야 한다. 컴포넌트가 이 값으로 하는 일은 되돌려주기뿐이므로 알 필요가 없다.
+
+화면별 어댑터가 각자 자기 방식으로 채운다.
+
+```ts
+// A — 커서. 버리던 값을 그대로 넘기기만 하면 끝
+fetchComments: (sort, pageParam) =>
+  fetchAComments({ id, limit: PAGE_SIZE, cursor: pageParam as string | undefined, sort })
+    .then((p) => ({ items: p.items, total: p.totalCount, nextPageParam: p.nextCursor })),
+
+// C — 서버가 hasMore를 정확히 계산해 준다 (limit+1 조회 방식)
+fetchComments: async (sort, pageParam) => {
+  const offset = (pageParam as number | undefined) ?? 0;
+  const r = await fetchCComments({ id, sort, offset, limit: PAGE_SIZE });
+  return { ...r, nextPageParam: r.hasMore ? offset + PAGE_SIZE : null };
+},
+
+// B — hasMore가 없다. "꽉 채워 왔으면 더 있다"로 판단
+fetchComments: async (sort, pageParam) => {
+  const offset = (pageParam as number | undefined) ?? 0;
+  const r = await fetchBComments(id, sort, offset, PAGE_SIZE);
+  return { ...r, nextPageParam: r.items.length < PAGE_SIZE ? null : offset + PAGE_SIZE };
+},
+```
+
+그리고 컴포넌트는 이렇게 바뀐다.
+
+```ts
+const q = useInfiniteQuery({
+  queryKey: [...keyBase, sort],
+  queryFn: ({ pageParam }) => api.fetchComments(sort, pageParam),
+  initialPageParam: undefined as unknown,
+  getNextPageParam: (last) => last.nextPageParam ?? undefined,
+});
+
+const comments = useMemo(
+  () => q.data?.pages.flatMap((p) => p.items) ?? [],
+  [q.data]
+);
+```
+
+`getNextPageParam`이 `undefined`를 반환하면 TanStack Query가 "끝"으로 본다. 그래서 `null ?? undefined`로 변환한다.
+
+결과: 서버 수정 0. 나중에 서버를 커서로 통일하더라도 어댑터에서 담는 값만 바뀌고 컴포넌트는 그대로다.
+
+---
+
+## 함정 1 — 끝 판단을 `total`과 비교하면 안 된다
+
+가장 자연스러워 보이는 코드가 틀렸다.
+
+```ts
+nextPageParam: offset + items.length < total ? offset + PAGE_SIZE : null   // ✗
+```
+
+이 시스템은 소프트 삭제를 쓴다. 삭제된 항목도 살아있는 답글이 있으면 placeholder로 목록에 실려 온다. 그런데 `total`은 활성 항목만 센다. 두 수가 애초에 다른 걸 센다.
+
+실측으로 확인됐다. 507개짜리 목록에서,
+
+```
+offset=0   → 20개    offset=480 → 20개
+offset=20  → 20개    offset=500 → 6개  ← 여기서 끝
+                     total = 507, 실제 목록 = 506
+```
+
+`total` 기준이었다면 `500 + 6 = 506 < 507`이므로 다음 페이지를 또 요청하고, 0개를 받고, 다시 판단하는 루프에 걸린다.
+
+```ts
+nextPageParam: items.length < PAGE_SIZE ? null : offset + PAGE_SIZE   // ✓
+```
+
+받은 개수가 요청 개수보다 적으면 끝. 서버가 무엇을 세든 상관없다. 정확히 나누어떨어질 때 빈 요청이 한 번 더 나가지만, 그건 무한 루프보다 훨씬 싸다.
+
+> 교훈: 서버의 `total`과 목록 길이가 같은 것을 센다는 보장이 없다. 소프트 삭제, 권한 필터, placeholder — 어긋날 이유는 많다.
+
+---
+
+## 함정 2 — 낙관 업데이트의 캐시 모양이 바뀐다
+
+`useQuery` → `useInfiniteQuery`로 가면 캐시 구조가 통째로 달라진다.
+
+```ts
+// before
+{ items: CommentItem[], total: number }
+
+// after
+{ pages: CommentPage[], pageParams: unknown[] }
+```
+
+`setQueryData`로 하던 낙관 업데이트(작성·수정·삭제·좋아요)가 전부 조용히 무력화된다. 타입을 안 맞춰두면 런타임에 `old.items`가 `undefined`라 아무 일도 안 일어나고, 에러도 안 난다.
+
+대상이 몇 번째 페이지에 있는지 알 수 없으니 전 페이지를 훑는 헬퍼를 하나 만들어 두는 게 낫다.
+
+```ts
+function mapCommentPages(
+  old: InfiniteComments | undefined,
+  mapItems: (items: CommentItem[]) => CommentItem[],
+  totalDelta = 0
+): InfiniteComments | undefined {
+  if (!old) return old;
+  return {
+    ...old,
+    pages: old.pages.map((page, i) => ({
+      ...page,
+      items: mapItems(page.items),
+      // total은 페이지마다 실려오지만 화면은 첫 페이지 값만 읽으므로 거기만 보정
+      total: i === 0 ? Math.max(0, page.total + totalDelta) : page.total,
+    })),
+  };
+}
+```
+
+새 항목 삽입만 예외다. 정렬에 따라 넣을 페이지가 다르다.
+
+```ts
+const target = sort === 'newest' ? 0 : pages.length - 1;
+// 최신순은 첫 페이지 맨 앞, 인기순은 마지막으로 로드된 페이지 맨 뒤
+```
+
+---
+
+## 함정 3 — IntersectionObserver는 "전이"에서만 발화한다
+
+센티넬이 화면에 들어올 때 다음 페이지를 부르는 흔한 패턴인데, 여기에 함정이 있다.
+
+새 페이지가 도착해도 센티넬이 계속 보이는 상태 그대로면 콜백이 다시 울리지 않는다. 관찰자는 "안 보임 → 보임" 전이에서만 발화하기 때문이다. 사용자가 스크롤을 한 번 더 움직여야 다음 페이지가 온다.
+
+해결은 의외로 단순하다. 의존성에 진행 상태를 넣어 관찰자를 새로 붙이면 된다.
+
+```ts
+useEffect(() => {
+  if (!expanded) return;
+  const el = sentinelRef.current;
+  if (!el) return;
+  const observer = new IntersectionObserver(([entry]) => {
+    if (!entry?.isIntersecting) return;
+    if (visibleCount < totalFlattened) {
+      setVisibleCount((c) => Math.min(c + STEP, totalFlattened));
+      return;
+    }
+    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+  }, { rootMargin: '200px' });
+  observer.observe(el);
+  return () => observer.disconnect();
+}, [expanded, totalFlattened, visibleCount, hasNextPage, isFetchingNextPage, fetchNextPage]);
+```
+
+새로 `observe()`한 요소가 이미 교차 상태면 관찰자는 즉시 콜백을 한 번 울린다. 그래서 페이지가 도착해 `totalFlattened`가 늘면 → 이펙트 재실행 → 관찰자 재부착 → 즉시 발화 → 연속 로딩이 이어진다.
+
+---
+
+## 함정 4 — 서버 페이지와 화면 노출은 다른 단위다
+
+기존 UX는 "처음 10개 → 더보기 → 스크롤하며 10개씩"이었다. 이걸 서버 페이지 크기와 섞으면 안 된다.
+
+```
+서버 페이지 (네트워크)   PAGE_SIZE = 20
+화면 노출 (UX)           STEP      = 10
+```
+
+두 단위를 분리해두면 조건이 깔끔해진다.
+
+```ts
+const hasMore = totalFlattened > visibleCount || hasNextPage;
+//              ─────────────────────────────    ───────────
+//              로드분에 아직 안 보여준 게 있음    서버에 더 있음
+```
+
+기존 버그가 바로 이 조건의 왼쪽만 있었던 것이다. 로드된 목록을 다 노출하면 서버에 500개가 남아 있어도 "끝"이 됐다.
+
+`PAGE_SIZE`는 8개 엔드포인트의 서버 상한(50~100)에 모두 들어가는 값으로 잡았다. 상한이 제각각일 때는 가장 낮은 상한보다 작은 하나의 값을 쓰는 게 화면별 분기보다 낫다.
+
+---
+
+## 남는 것
+
+"통일"의 대상을 잘못 잡으면 남의 코드를 고치게 된다. 페이징 방식을 통일하려 했으면 서버 7종을 건드려야 했다. 통일할 것이 *값의 취급 방식*이라는 걸 알아채고 나서는 프론트만으로 끝났다. 추상화의 목적은 차이를 없애는 게 아니라 차이를 몰라도 되게 만드는 것이다.
+
+`unknown`을 좁히지 않는 게 추상화다. `string | number`로 좁혔다면 지금은 편했겠지만 세 번째 방식이 나오면 인터페이스가 또 깨진다. 소비자가 그 값으로 아무것도 하지 않는다면 타입도 알 필요가 없다.
+
+서버가 주는 `total`을 페이지 끝 판단에 쓰지 않는다. 목록 길이와 카운트가 같은 것을 센다는 보장이 없다. "받은 개수 < 요청 개수"는 서버 구현과 무관하게 성립한다.
+
+쿼리 훅을 바꾸면 캐시 모양이 바뀌고, 낙관 업데이트가 조용히 죽는다. 에러도 안 나고 그냥 반영이 안 된다. `setQueryData`를 쓰는 지점을 전부 찾아 새 모양에 맞췄는지 확인해야 한다.
+
+상한 값이 제각각인 건 대개 설계가 아니라 사고다. 8개 중 6개가 50, 2개가 100이었고 그 차이를 설명하는 근거가 코드에 없었다. 한 곳은 프론트가 100을 보내는데 서버가 50으로 자르고 있었다. 이런 건 발견했을 때 기록해두지 않으면 다음 사람이 또 판다.
+
+---
+
+## 관련 노트
+
+- [Redis — 프론트엔드 개발자 관점](/posts/redis-for-frontend-developers)
+- [Hono RPC 마이그레이션](/posts/hono-rpc-type-safe-migration)
