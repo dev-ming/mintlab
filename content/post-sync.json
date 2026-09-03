@@ -130,5 +130,19 @@
     "tags": ["seo", "google-search-console", "sitemap", "indexing", "nextjs", "csr"],
     "category": "log",
     "excerpt": "사이트맵 제출 후 색인이 한 건뿐인 현상을 서버 HTML, 중복 URL, 크롤링 단계로 나눠 진단하고 기다릴 문제와 고칠 문제를 구분한 회고."
+  },
+  "Sentry 도입 검토 — 에러 트래킹, 직접 만들까 사서 쓸까.md": {
+    "slug": "sentry-error-tracking-build-vs-buy-guide",
+    "date": "2026-09-03",
+    "tags": ["sentry", "error-tracking", "monitoring", "session-replay", "sourcemap", "privacy"],
+    "category": "guide",
+    "excerpt": "Sentry의 에러 추적·성능 모니터링·세션 리플레이 기능과 비용 및 개인정보 이슈를 살펴보고, 직접 구축과 SaaS 도입의 현실적인 판단 기준을 정리한 가이드."
+  },
+  "TanStack Query 훅을 패키지로 분리하기 — 웹·앱 공용 데이터 레이어.md": {
+    "slug": "tanstack-query-shared-web-mobile-data-layer",
+    "date": "2026-09-03",
+    "tags": ["tanstack-query", "react", "react-native", "monorepo", "dependency-injection", "optimistic-update"],
+    "category": "guide",
+    "excerpt": "TanStack Query 훅을 모노레포 공용 패키지로 분리해 웹과 React Native가 데이터 규칙을 공유하는 구조와 낙관적 업데이트·캐시 무효화의 함정을 정리한 가이드."
   }
 }
