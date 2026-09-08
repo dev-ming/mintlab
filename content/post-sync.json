@@ -144,5 +144,12 @@
     "tags": ["tanstack-query", "react", "react-native", "monorepo", "dependency-injection", "optimistic-update"],
     "category": "guide",
     "excerpt": "TanStack Query 훅을 모노레포 공용 패키지로 분리해 웹과 React Native가 데이터 규칙을 공유하는 구조와 낙관적 업데이트·캐시 무효화의 함정을 정리한 가이드."
+  },
+  "Storybook 도입기 — 디자이너가 코드를 고치고 바로 확인하는 환경 만들기.md": {
+    "slug": "storybook-designer-live-component-workflow",
+    "date": "2026-09-07",
+    "tags": ["storybook", "nextjs", "vite", "design-system", "component", "hmr", "collaboration"],
+    "category": "guide",
+    "excerpt": "Next.js 프로젝트에 Storybook을 도입해 실제 컴포넌트를 상태별로 검수하고, 디자이너가 HMR로 수정 결과를 즉시 확인하는 협업 환경을 구축한 가이드."
   }
 }

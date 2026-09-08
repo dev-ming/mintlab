@@ -1,0 +1,217 @@
+---
+title: "Storybook 도입기 — 디자이너가 코드를 고치고 바로 확인하는 환경 만들기"
+date: "2026-09-07"
+tags: ["storybook","nextjs","vite","design-system","component","hmr","collaboration"]
+category: "guide"
+excerpt: "Next.js 프로젝트에 Storybook을 도입해 실제 컴포넌트를 상태별로 검수하고, 디자이너가 HMR로 수정 결과를 즉시 확인하는 협업 환경을 구축한 가이드."
+---
+
+"이 버튼 패딩이 몇 px이에요?" "이 카드 라운드 값 살짝 키우면 어때 보여요?" — 디자이너와 이런 대화를 할 때마다 개발자가 로컬 서버를 띄우고, 해당 화면까지 이동하고, 로그인하고, 데이터가 있는 상태를 만들어야 한다면 왕복 비용이 너무 크다. Storybook을 도입하면서 정리한 것들: 왜 쓰는지, Next.js 프로젝트에 어떻게 붙이는지, 그리고 도입하면서 가장 많이 받은 질문 — "스토리 파일은 고정된 코드인데 어떻게 컴포넌트 수정이 바로 반영되나?" — 에 대한 답.
+
+---
+
+## Storybook이 뭔가
+
+컴포넌트를 앱 바깥에서, 상태별로 하나씩 꺼내 보여주는 카탈로그다.
+
+- 실제 서비스는 "홈 → 상세 → 탭 클릭 → 특정 데이터 상태"까지 가야 어떤 UI가 보이는데, Storybook은 그 UI 조각을 바로 띄운다.
+- 버튼의 primary/secondary/disabled, 카드의 variant 3종, 배너의 진행중/마감/준비중 같은 모든 상태를 한 화면에 나열할 수 있다.
+- DB도, API 서버도, 로그인도 필요 없다. 스토리에 목데이터를 넣어두기 때문.
+
+용도는 크게 셋:
+
+1. 디자이너 검수 — 실측(패딩·마진), 상태별 확인, 토큰 적용 여부 확인
+2. 개발자 개발 환경 — 복잡한 화면 상태를 만들 필요 없이 컴포넌트만 띄워놓고 개발
+3. 살아있는 문서 — "우리 서비스에 어떤 공용 컴포넌트가 있더라?"의 답
+
+---
+
+## 핵심 오해 풀기: 스토리는 스크린샷이 아니다
+
+도입하고 가장 많이 받은 질문. 스토리 파일을 열어보면 이런 코드가 있다:
+
+```tsx
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { Card } from '@/components/ui/Card';
+
+const meta = {
+  title: 'UI/Card',
+  component: Card,
+  args: { variant: 'default', children: 'Card content' },
+} satisfies Meta<typeof Card>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+```
+
+props가 하드코딩돼 있으니 "고정된 결과물"처럼 보인다. 그래서 "컴포넌트 코드를 고치면 스토리북에 반영되긴 하나?"라는 의문이 나온다.
+
+답: 스토리 파일에 고정된 건 "어떤 상황으로 보여줄지"(props 조합)뿐이다. 첫 줄의 `import { Card }`가 핵심 — 컴포넌트 자체는 실제 소스 파일을 import해서 렌더 시점마다 실행한다. 스토리는 복사본이나 캡처가 아니라 "진짜 Card를 이 props로 띄워라"라는 실행 코드다.
+
+비유하면 스토리 파일은 전시대 배치도다. "이 자리에 default, 저 자리에 elevated를 놓는다"까지만 정하고, 전시되는 물건은 매번 원본 창고(컴포넌트 소스)에서 가져온다. 배치도를 안 바꿔도 창고의 물건을 고치면 전시물이 바뀐다.
+
+그래서 실시간 반영의 흐름은:
+
+1. Storybook 개발 서버(Vite)가 뜨면, 브라우저는 서버가 실시간으로 컴파일해주는 코드를 렌더한다 (미리 빌드해둔 산출물이 아님)
+2. Vite는 스토리가 import하는 의존성 그래프 전체를 감시한다 — 컴포넌트 소스, 그 안에서 쓰는 하위 컴포넌트, 전역 CSS의 디자인 토큰까지
+3. 누군가 컴포넌트 파일의 클래스를 고치고 저장하면, Vite가 그 모듈만 다시 컴파일해 웹소켓으로 브라우저에 밀어넣고(HMR), 열려 있는 스토리가 새로고침 없이 즉시 다시 그려진다
+
+역으로, props를 이리저리 바꿔보는 것도 스토리 수정 없이 된다 — `argTypes`를 선언해두면 하단 Controls 패널에서 셀렉트/토글로 실시간 조작 가능하다.
+
+---
+
+## Next.js 프로젝트에 붙이기
+
+### 설치
+
+```bash
+cd apps/web   # 프론트 앱 루트
+bunx storybook@latest init
+```
+
+Next.js를 감지하면 `@storybook/nextjs-vite` 프레임워크를 잡아준다. Next의 웹팩 빌드와 별개로 Vite로 도는 구성이라 빠르고, `next/image`·`next/link`·`next/navigation` 목킹이 내장돼 있다.
+
+### 설정 두 파일
+
+`.storybook/main.ts` — 스토리 위치와 정적 자산:
+
+```ts
+import type { StorybookConfig } from '@storybook/nextjs-vite';
+
+const config: StorybookConfig = {
+  framework: '@storybook/nextjs-vite',
+  stories: ['../app/**/*.stories.@(ts|tsx)'],
+  staticDirs: ['../public'],   // /icons/foo.svg 같은 public 경로 그대로 사용
+};
+export default config;
+```
+
+`.storybook/preview.tsx` — 앱의 렌더 환경을 재현하는 곳. 여기가 실사용감을 좌우한다:
+
+```tsx
+import type { Preview } from '@storybook/nextjs-vite';
+import { NextIntlClientProvider } from 'next-intl';
+import messages from '../messages/en.json';
+import '../app/globals.css';   // 디자인 토큰·폰트 — 이거 없으면 무늬만 컴포넌트
+
+const preview: Preview = {
+  decorators: [
+    (Story) => (
+      <NextIntlClientProvider locale="en" messages={messages}>
+        {/* 모바일 웹이면 실제 앱 폭으로 감싸야 실측이 의미 있다 */}
+        <div style={{ maxWidth: 375 }}>
+          <Story />
+        </div>
+      </NextIntlClientProvider>
+    ),
+  ],
+};
+export default preview;
+```
+
+체크리스트:
+
+- 전역 CSS를 반드시 import — Tailwind 토큰, 커스텀 폰트가 여기서 들어온다. 빼먹으면 스타일 없는 뼈대가 뜬다
+- i18n Provider 래핑 — `useTranslations` 쓰는 컴포넌트가 하나라도 있으면 필수
+- 앱 컨테이너 폭 재현 — 모바일 기준 서비스라면 375px 등으로 감싸야 디자이너의 실측이 실서비스와 일치한다
+
+### 실행 스크립트
+
+```json
+{
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  }
+}
+```
+
+---
+
+## "운영 배포에 섞이면 어떡하지?" — 안 섞인다
+
+도입 전 걱정했던 부분인데, 구조적으로 분리돼 있다.
+
+- `next build`는 `app/`(또는 `pages/`) 라우트 기준으로만 번들을 만든다. `*.stories.tsx`는 어떤 라우트에서도 import되지 않으므로 번들에 포함될 방법이 없다
+- Storybook은 자체 Vite 서버/빌더로 도는 완전 별개 도구다. `storybook dev`를 실행해야만 뜬다
+- 유일한 주의점: `storybook build`가 만드는 정적 산출물(`storybook-static/`)이 리포에 커밋되지 않도록 `.gitignore`에 추가
+
+```gitignore
+**/storybook-static/
+*storybook.log
+```
+
+devDependencies에만 추가되므로 프로덕션 번들 크기에도 영향이 없다.
+
+---
+
+## 어떤 컴포넌트를 스토리로 만들 수 있나
+
+전부는 아니다. 경계가 명확하다.
+
+되는 것 — 표시(presentational) 컴포넌트
+- props를 받아 그리기만 하는 것: 버튼, 카드, 뱃지, 배너, 리스트 아이템
+- 목데이터를 props로 주입하면 끝
+
+안 되는(억지로 할 필요 없는) 것 — 페이지 컨테이너
+- `useQuery`로 데이터를 직접 부르고, 라우터·세션에 붙어 있는 `XxxPageContent`류
+- 띄우려면 QueryClient 목킹, 라우터 목킹, API 목킹(MSW)까지 얹어야 하는데, 디자이너가 패딩 잴 대상도 아니라서 투자 대비 효용이 낮다
+
+여기서 실용적인 교훈 하나: 페이지 컨테이너 안에 인라인으로 박힌 UI는 스토리북에서 확인할 수 없다. "See more" 버튼 하나를 컨테이너 JSX에 직접 쓰면 그건 스토리북 밖이다. 디자이너가 자주 만질 UI 조각이라면 작은 컴포넌트로 추출해두는 게 좋다 — 스토리를 만들 수 있게 되는 것 자체가 컴포넌트 분리의 부수 효과적 기준이 된다.
+
+---
+
+## 디자이너 워크플로우
+
+### 세팅 (최초 1회)
+
+```bash
+git clone <repo> && cd <repo>
+bun install          # 패키지 매니저는 프로젝트에 맞게
+cd apps/web
+bun run storybook    # → http://localhost:6006
+```
+
+포인트: DB·API·환경변수 없이 돈다. 스토리는 전부 목데이터라 백엔드 연결이 필요 없다. 디자이너 머신에 요구되는 건 git과 런타임(bun/node)뿐.
+
+### 고치고 바로 보기
+
+1. 스토리북을 켜둔 채 에디터에서 컴포넌트 파일을 연다
+2. Tailwind 클래스나 전역 CSS의 토큰 값을 수정하고 저장
+3. 브라우저의 스토리가 즉시 갱신됨 (HMR — 새로고침 불필요)
+
+측정 도구도 내장돼 있다:
+- Measure (단축키 `m`): 요소에 호버하면 패딩/마진/크기 실측값 오버레이
+- Outline: 모든 요소의 박스 경계 표시
+- Controls: props를 UI에서 실시간 변경
+
+### 반영은 결국 git으로
+
+로컬 수정은 로컬에만 있다. 확인이 끝난 변경은 커밋 → 푸시 → 리뷰의 평소 흐름을 타야 서비스에 반영된다. "디자이너가 확인까지 하고 넘긴 diff"는 리뷰 비용이 확 줄어드는 게 체감 이점.
+
+한 가지 헷갈리기 쉬운 것: 개발자가 자기 머신에 띄운 스토리북을 디자이너가 원격으로 열람만 하는 구성도 가능하다(같은 네트워크에서 `http://<개발자IP>:6006`). 이때 화면은 개발자 머신의 워킹트리를 렌더하는 것이라, 디자이너가 자기 컴퓨터에서 뭘 고쳐도 변하지 않는다. "고치고 바로 본다"가 목적이면 반드시 자기 머신에서 실행해야 한다.
+
+---
+
+## 부록: WSL2에서 다른 컴퓨터가 접속 안 될 때
+
+Windows + WSL2 조합이면 스토리북이 WSL 안에서 돌기 때문에 같은 네트워크의 다른 기기에서 `http://<윈도우IP>:6006`으로 바로 접속이 안 된다. Windows에 포트 프록시를 걸어야 한다 (관리자 PowerShell):
+
+```powershell
+netsh interface portproxy add v4tov6 listenport=6006 listenaddress=0.0.0.0 connectport=6006 connectaddress=::1
+New-NetFirewallRule -DisplayName "Storybook 6006" -Direction Inbound -LocalPort 6006 -Protocol TCP -Action Allow
+```
+
+함정 하나: `connectaddress=127.0.0.1`(v4tov4)로 걸면 WSL 릴레이가 IPv6(`::1`)에만 바인딩된 경우 프록시가 자기 자신을 다시 가리키는 루프가 생겨 접속이 무한 대기한다. `v4tov6` + `::1` 조합이 안전했다.
+
+---
+
+## 정리
+
+- 스토리 파일은 스크린샷이 아니라 실제 컴포넌트를 import해 실행하는 코드 — 그래서 컴포넌트 수정이 HMR로 즉시 반영된다. 스토리가 고정하는 건 "보여줄 상황"뿐이다
+- `next build`와 완전히 분리돼 있어 운영 배포에 섞일 일이 없다 (`storybook-static/`만 gitignore)
+- 스토리 대상은 표시 컴포넌트까지 — 페이지 컨테이너에 인라인된 UI는 스토리북 밖이므로, 자주 만질 조각은 컴포넌트로 추출하는 게 답
+- preview에서 전역 CSS·i18n·앱 폭을 재현해야 디자이너의 실측이 실서비스와 일치한다
+- 디자이너가 "고치고 바로 보기"를 하려면 자기 머신 실행이 필수, 원격 열람은 확인 전용
