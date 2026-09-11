@@ -145,6 +145,13 @@
     "category": "guide",
     "excerpt": "TanStack Query 훅을 모노레포 공용 패키지로 분리해 웹과 React Native가 데이터 규칙을 공유하는 구조와 낙관적 업데이트·캐시 무효화의 함정을 정리한 가이드."
   },
+  "Claude Code 토큰 절약 설정 정리.md": {
+    "slug": "claude-code-token-saving-configuration",
+    "tags": ["claude-code", "token-optimization", "subagent", "hooks", "permissions", "context-management"],
+    "category": "ai",
+    "subcategory": "guide",
+    "excerpt": "Claude Code의 서브에이전트 모델 분리, 권한 설정과 차단 훅, 읽기 범위 제한과 메모리 정리로 토큰 사용을 줄이는 설정을 정리한 가이드."
+  },
   "Storybook 도입기 — 디자이너가 코드를 고치고 바로 확인하는 환경 만들기.md": {
     "slug": "storybook-designer-live-component-workflow",
     "date": "2026-09-07",
