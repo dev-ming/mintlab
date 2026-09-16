@@ -158,5 +158,12 @@
     "tags": ["storybook", "nextjs", "vite", "design-system", "component", "hmr", "collaboration"],
     "category": "guide",
     "excerpt": "Next.js 프로젝트에 Storybook을 도입해 실제 컴포넌트를 상태별로 검수하고, 디자이너가 HMR로 수정 결과를 즉시 확인하는 협업 환경을 구축한 가이드."
+  },
+  "편의점 재고 감시기 만들기 — 이마트24·세븐일레븐 API 뜯어보기.md": {
+    "slug": "convenience-store-inventory-monitor-emart24-seven-eleven-api",
+    "date": "2026-09-15",
+    "tags": ["inventory-monitoring", "emart24", "seven-eleven", "api", "webview", "reverse-engineering", "automation"],
+    "category": "guide",
+    "excerpt": "이마트24와 세븐일레븐 웹뷰 API를 분석해 점포별 실시간 재고를 조회하고, 재입고 판정과 요청 예산, 모바일 알림까지 구성한 재고 감시기 제작 가이드."
   }
 }
