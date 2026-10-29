@@ -165,5 +165,12 @@
     "tags": ["inventory-monitoring", "emart24", "seven-eleven", "api", "webview", "reverse-engineering", "automation"],
     "category": "guide",
     "excerpt": "이마트24와 세븐일레븐 웹뷰 API를 분석해 점포별 실시간 재고를 조회하고, 재입고 판정과 요청 예산, 모바일 알림까지 구성한 재고 감시기 제작 가이드."
+  },
+  "모달에 브라우저 뒤로가기 붙이기 — history.pushState와 popstate.md": {
+    "slug": "modal-browser-back-navigation-history-api",
+    "date": "2026-10-28",
+    "tags": ["browser-history", "history-api", "pushstate", "popstate", "modal", "react", "ux"],
+    "category": "guide",
+    "excerpt": "모달과 전체 화면 레이어에 브라우저 뒤로가기를 자연스럽게 연결하기 위해 History API와 popstate를 적용하고, 편집 확인·라우터·스크롤 복원 함정을 해결한 가이드."
   }
 }
