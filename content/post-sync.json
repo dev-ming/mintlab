@@ -172,5 +172,20 @@
     "tags": ["browser-history", "history-api", "pushstate", "popstate", "modal", "react", "ux"],
     "category": "guide",
     "excerpt": "모달과 전체 화면 레이어에 브라우저 뒤로가기를 자연스럽게 연결하기 위해 History API와 popstate를 적용하고, 편집 확인·라우터·스크롤 복원 함정을 해결한 가이드."
+  },
+  "작업마다 모델 나눠 쓰기.md": {
+    "slug": "claude-code-task-based-model-selection",
+    "date": "2026-11-04",
+    "tags": ["claude-code", "model-selection", "subagent", "cost-optimization", "prompt-caching", "workflow"],
+    "category": "ai",
+    "subcategory": "guide",
+    "excerpt": "Claude Code에서 작업 난이도와 역할에 맞춰 모델을 나누고, 서브에이전트·보안 리뷰·프롬프트 캐시까지 고려해 비용과 품질을 함께 관리하는 방법을 정리한 가이드."
+  },
+  "니케 PC 런처 해킹 사고 정리 — 무슨 일이 있었고, 내 PC는 어떻게 확인하나.md": {
+    "slug": "nikke-pc-launcher-supply-chain-attack-checklist",
+    "date": "2026-11-04",
+    "tags": ["security", "supply-chain-attack", "malware", "incident-response", "windows", "ioc"],
+    "category": "guide",
+    "excerpt": "니케 PC 런처 CDN 변조 사고의 공격 흐름과 감염 지표를 정리하고, Windows PC에서 확인·격리·계정 보호를 진행하는 체크리스트를 제공한다."
   }
 }

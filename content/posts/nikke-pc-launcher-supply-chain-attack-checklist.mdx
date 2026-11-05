@@ -1,0 +1,228 @@
+---
+title: "니케 PC 런처 해킹 사고 정리 — 무슨 일이 있었고, 내 PC는 어떻게 확인하나"
+date: "2026-11-04"
+tags: ["security","supply-chain-attack","malware","incident-response","windows","ioc"]
+category: "guide"
+excerpt: "니케 PC 런처 CDN 변조 사고의 공격 흐름과 감염 지표를 정리하고, Windows PC에서 확인·격리·계정 보호를 진행하는 체크리스트를 제공한다."
+---
+
+> 이 글은 2026-11-04 기준으로 공개된 기사·커뮤니티 분석을 정리한 것이다. 조사가 진행 중이라 내용이 바뀔 수 있다.
+
+니케 PC 런처를 켰을 뿐인데 원격 제어 악성코드가 깔릴 수 있었다는 보고가 나왔다. 게임 파일이 아니라 런처가 불러오는 웹 스크립트가 공식 CDN에서 변조된 사건이라, 정상적으로 설치하고 정상적으로 실행한 사람이 그대로 노출됐다.
+
+결론부터: 9월 27일 ~ 11월 4일 사이에 PC 런처를 켰다면 확인이 필요하다. 다만 "변조된 파일을 받았다"와 "감염됐다"는 다른 이야기라, 아래 체크리스트로 흔적을 직접 확인해 보는 게 맞다.
+
+---
+
+## 0. 한 줄 요약
+
+```
+레벨인피니트 CDN의 런처용 JS 4개 변조 (9/27)
+  → 런처가 변조 JS 로드
+  → 외부 서버(insightjs.com)에서 로더·페이로드 다운로드
+  → 원격 제어 에이전트 실행 (런처를 꺼도 유지)
+  → 브라우저 비밀번호·쿠키·SSH 키·코인 지갑 등 탈취 가능
+```
+
+---
+
+## 1. 무슨 일이 있었나
+
+니케 PC 런처는 내부적으로 웹뷰(크로미움)를 띄워 공지·배너 같은 화면을 그린다. 이 화면이 불러오는 자바스크립트 파일은 퍼블리셔 레벨인피니트(텐센트 계열)의 CDN에서 내려온다. 공격자는 바로 이 CDN 위의 파일 4개에 외부 스크립트를 불러오는 코드를 심었다.
+
+변조된 파일은 다음 네 개다.
+
+```
+https://sg-gpts.playerinfinite.com/comm/assets/lib/aegis-fix.min.js
+https://na-webassets.playerinfinite.com/comm/nikke_launcher/assets/images.7fec4c32.js
+https://na-webassets.playerinfinite.com/comm/nikke_launcher/assets/FeedList.feb647c9.js
+https://na-webassets.playerinfinite.com/comm/assets/lib/vue-bucket.min.js
+```
+
+각 파일에는 `insightjs.com/l.js?f=...` 를 불러오는 코드가 들어갔고, 이 로더가 다시 `analytics.insightjs.com`에서 페이로드(`insight.bundle`, LuaJIT 바이트코드)를 받아 실행하는 구조였다. 사용자 입장에서 보이는 건 평소와 똑같은 런처 화면뿐이다.
+
+전형적인 공급망 공격(supply-chain attack)이다. 게임사가 직접 배포하는 경로가 오염됐기 때문에 백신이나 "공식 사이트에서만 받기" 같은 평소 습관으로는 막을 수 없다.
+
+---
+
+## 1-1. 왜 뚫렸나 — "만료 도메인을 해커가 샀다"는 이야기
+
+커뮤니티에서 가장 많이 도는 설명은 이거다.
+
+> 런처가 쓰던 도메인이 만료됐는데, 해커가 그 도메인을 사서 악성코드를 올렸다.
+
+반은 맞고, 핵심은 틀렸다.
+
+### 맞는 부분: 도메인은 실제로 '주운' 도메인이다
+
+`insightjs.com`은 2019~2021년에 다른 사람이 쓰다가 만료된 뒤 약 5년간 방치돼 있던 도메인이다. 공격자는 이걸 9월 27일 10:59(KST)에 다시 등록했다. 이전 소유자와는 관계없는 사람이고, 이후 서브도메인 다섯 개짜리 그럴듯한 "분석 서비스" 사이트를 겉껍데기로 꾸며 놨다.
+
+새로 만든 도메인보다 오래된 도메인이 보안 필터나 평판 검사에 덜 걸리기 때문에, 공격 인프라로 만료 도메인을 재활용하는 건 흔한 수법이다(이 부분은 일반적인 해석이고, 공격자가 직접 밝힌 이유는 아니다).
+
+### 틀린 부분: 니케는 원래 그 도메인을 쓴 적이 없다
+
+만료 도메인 공격이 성립하려면 정상 코드가 원래 그 도메인을 부르고 있어야 한다. 개발사가 쓰던 도메인 갱신을 깜빡하면, 그걸 산 사람이 그 주소에 뭘 올려도 정상 코드가 알아서 받아 가는 구조다.
+
+이번엔 그렇지 않았다.
+
+- 변조 전 정상 파일에는 `insightjs`라는 문자열 자체가 없다.
+- 변조된 파일은 정상본보다 약 700바이트 커졌고, 그 안에 `insightjs.com`을 부르는 로더가 새로 끼워져 있었다. URL은 숫자 배열로 숨겨 놓고 `TextDecoder`로 풀어서 쓰는 식으로 감춰 뒀다.
+- 도메인 재등록(10:59) → 인증서 발급(12:00) → CDN 파일 변조(15:41)가 같은 날 약 5시간 안에 이어진다.
+
+즉 순서는 "도메인이 만료돼서 뚫렸다"가 아니라 이렇다.
+
+```
+1. 공격자가 어떤 방법으로 레벨인피니트 CDN에 쓰기 권한을 얻음   ← 진짜 원인 (미확인)
+2. 자기가 쓸 서버 주소로 만료 도메인 insightjs.com을 등록
+3. CDN의 정상 JS 4개에 insightjs.com을 부르는 코드를 직접 삽입
+```
+
+도메인은 침입 수단이 아니라 침입한 뒤 쓴 도구였다. 만약 도메인만 샀다면 아무 일도 일어나지 않았다. 정상 런처는 그 주소를 부르지 않으니까.
+
+### 그럼 진짜 원인은?
+
+아직 모른다. 분석자들도 "공격자가 CDN 저장소, 또는 거기에 파일을 올리는 배포 파이프라인에 쓰기 권한을 가졌다"는 것까지만 말하고 있고, 그 권한을 어떻게 얻었는지(계정 탈취, 유출된 API 키, 배포 서버 침해 등)는 공개된 근거가 없다. 레벨인피니트도 11/4 기준으로 "제3자에 의해 변조되었을 가능성"과 "영향 범위 파악 중"까지만 밝혔다.
+
+> 정리하면: 만료 도메인 = 공격자의 서버 주소, CDN 쓰기 권한 탈취 = 실제 원인(경위 미공개). 둘을 섞어서 "도메인 관리 실수로 뚫렸다"고 쓰면 틀린 이야기가 된다.
+
+---
+
+## 2. 타임라인 (한국 시간)
+
+| 일시 (KST) | 내용 |
+| --- | --- |
+| 9/27 10:59 | 공격자가 `insightjs.com` 도메인 재등록 (2021년 이후 약 5년 방치된 만료 도메인) |
+| 9/27 12:00 | `insightjs.com` 인증서 발급 |
+| 9/27 15:41 | 공식 CDN의 JS 파일 4개 변조 |
+| 10/23~24경 | 일부 PC에서 원격 제어 에이전트 실행 확인 (보고된 가장 이른 시점) |
+| 10/29 00:46 | `FeedList.feb647c9.js` 원본 서버에서 정상화. 단, 일부 CDN 엣지는 변조본 계속 제공 |
+| 11/1~11/3 | 추가 감염 사례 보고 |
+| 11/4 새벽 | GitHub에 기술 분석 공개, 이슈 확산 |
+| 11/4 02:04~02:21 | 나머지 파일 3개 정상 파일로 교체 |
+| 11/4 02:30경 | 운영팀, "스크립트 파일이 제3자에 의해 변조되었을 가능성" 확인 후 클라이언트 수정 업데이트 |
+| 11/4 03:31 | 공격자 서버(`89.127.233.127`) 응답 중단 |
+| 11/4 07:26 | 일부 CDN 서버에서 여전히 변조된 파일 제공 관측 |
+
+파일이 변조된 시점부터 공개까지 약 5주가 걸렸다. 그리고 서버를 고쳐도 이미 감염된 PC는 저절로 치료되지 않는다. 런처 캐시에 변조 파일이 남아 있을 수 있고, 에이전트는 런처와 별개로 PC에 남아 있을 수 있다.
+
+---
+
+## 3. 악성코드는 뭘 할 수 있나
+
+분석된 페이로드는 이름 그대로 원격 제어 에이전트다. 공개된 분석 기준으로 확인된 기능은 다음과 같다.
+
+- 임의 명령 실행, 파일 다운로드·업로드, 화면 캡처
+- 크롬·엣지에 저장된 비밀번호, 쿠키, 인증 토큰 수집
+- SSH 키, 클라우드·개발자 자격 증명, VS Code 계열 확장 프로그램의 비밀값 접근
+- `wallet_files` 명령으로 크롬의 코인 지갑 확장 28종(메타마스크, 팬텀, 코인베이스, 바이낸스, OKX 등) 데이터 수집
+- 크롬이 불러오는 DLL을 심고 레지스트리에 등록해 런처를 꺼도 계속 동작
+
+실제로 얼마나 많은 사람이 감염됐는지, 실제로 어떤 정보가 유출됐는지는 아직 확인되지 않았다. 다만 에이전트가 돌았다면 "임의 명령 실행"이 가능했던 것이므로, 감염된 PC는 전부 노출된 것으로 간주하는 게 원칙이다.
+
+> 같은 CDN을 쓰는 다른 레벨인피니트 게임(배그 모바일, 델타포스 등)도 영향이 있는지 우려가 나왔지만, 11/4 기준으로 같은 악성코드가 확인됐다는 공개 근거는 없다.
+
+---
+
+## 4. 내 PC는 괜찮은가 — 체크리스트
+
+전제: 9/27 이후 니케 PC 런처를 한 번이라도 실행했는가? 아니라면 여기서 끝이다. 실행했다면 아래를 순서대로 확인한다.
+
+### 4-1. 감염 흔적 확인
+
+| # | 확인할 곳 | 감염 신호 |
+| --- | --- | --- |
+| 1 | `<니케 설치 폴더>\Launcher\intl_service\debug.log` | `k2f_chan` 문자열이 있으면 에이전트가 실행된 것 |
+| 2 | `%APPDATA%\nikke_launcher\tbs_cache\Local Storage\leveldb\` | `k2f.agent.state` 문자열 |
+| 3 | `%APPDATA%\nikke_launcher\tbs_cache\Code Cache\js\` | `insightjs.com/l.js` 문자열 |
+| 4 | `<니케 설치 폴더>\Launcher\log\tinyget\` | `k2f.lua` 또는 `tinyget.<숫자>.log` 형태 페이로드 |
+| 5 | `%LOCALAPPDATA%\Google\Chrome\User Data\PlatformExperienceHelper\` | 64자 16진수 이름의 하위 폴더 안에 `platform_experience_helper.dll` |
+| 6 | `%TEMP%` | `k2f-bcreds-*`, `k2f_screen_*.jpg` |
+| 7 | 레지스트리 (아래 명령) | 키가 존재하면 감염 |
+
+레지스트리는 PowerShell에서 이렇게 확인한다.
+
+```powershell
+reg query "HKCU\Software\Classes\CLSID\{E77CC89B-7401-4C04-8CED-149DB35ADD04}"
+# "지정된 레지스트리 키 또는 값을 찾을 수 없습니다" → 정상
+```
+
+`debug.log`에서 문자열을 찾는 건 이 한 줄이면 된다. 설치 경로는 본인 환경에 맞게 바꾼다.
+
+```powershell
+Select-String -Path "C:\NIKKE\Launcher\intl_service\debug.log" -Pattern "k2f_chan","insightjs","agent started"
+# 아무것도 안 나오면 정상
+```
+
+### 4-2. 헷갈리기 쉬운 것들
+
+- HKLM의 같은 CLSID는 Windows 자녀 보호(`wpc.dll`) 정상 항목이다. 지우면 안 된다. 문제는 HKCU 쪽이다.
+- `C:\Program Files\Google\Chrome\Application\PlatformExperienceHelper\platform_experience_helper.exe`는 크롬 정상 파일이다. 의심 대상은 사용자 폴더(`User Data`) 아래의 DLL이다.
+- `debug.log`의 `FETCH_LIST suc success`는 정상 로그다.
+- `%TEMP%\onominan.tmp`는 다른 텐센트 프로그램에서도 생기는 파일이라 감염 지표가 아니다.
+- 백신 검사가 깨끗하다고 DLL이 없다는 보장은 없다. 오프라인 검사에서 놓친 사례가 보고됐다. 경로와 레지스트리로 직접 확인하는 게 확실하다.
+
+### 4-3. 네트워크 지표 (차단용)
+
+```
+insightjs.com
+analytics.insightjs.com
+insightjs.org            (현재는 경고 페이지)
+89.127.233.127
+```
+
+---
+
+## 5. 결과별로 할 일
+
+### 흔적이 없을 때
+
+1. 레벨인피니트가 공식적으로 복구를 확인하기 전까지 PC 런처를 실행하지 않는다.
+2. `%APPDATA%\nikke_launcher\tbs_cache` 를 삭제한다. 변조된 JS가 캐시에 남아 있을 수 있다.
+3. 찜찜하면 니케를 지운다. 제거 프로그램 뒤에 `<설치 폴더>`와 `%APPDATA%\nikke_launcher` 를 직접 지워야 깔끔하다.
+4. 선택: 니케 계정 비밀번호 변경 + 2단계 인증.
+
+### 흔적이 있을 때
+
+1. 인터넷을 끊는다. 런처를 켜지 않는다.
+2. HKCU의 CLSID 키를 삭제하고 재부팅한 뒤, `PlatformExperienceHelper\<64자리 폴더>`만 삭제한다(로드 중엔 잠겨 있어서 재부팅이 먼저다).
+3. 가능하면 Windows를 새로 설치한다. 에이전트가 임의 명령을 실행할 수 있었기 때문에, 알려진 흔적만 지운다고 끝났다고 장담할 수 없다.
+4. 다른 깨끗한 기기(휴대폰 등)에서 비밀번호를 바꾼다. 이메일 → 니케/레벨인피니트 → 디스코드·스팀 → 금융 → 브라우저에 저장했던 계정 순.
+5. 모든 세션에서 로그아웃하고, API 토큰·SSH 키를 폐기 후 재발급한다.
+6. 코인 지갑은 새 시드로 새 지갑을 만들어 자산을 옮긴다. 비밀번호 변경으로는 소용없다. 유출된 시드는 계속 유효하다.
+
+---
+
+## 6. 직접 확인해 본 결과
+
+내 PC에서도 실제로 확인해 봤다. 런처를 마지막으로 켠 건 10월 20일. 기간 한가운데다.
+
+- 런처 캐시(`tbs_cache\Cache`)에 남은 HTTP 응답 헤더를 보니, `FeedList`·`aegis-fix`·`images` 세 파일의 ETag가 보고서에 나온 변조본과 일치했다. `last-modified`도 `Sun, 27 Sep 2026 06:41 GMT`. 즉 변조된 스크립트를 받은 건 확실했다.
+- 그런데 `debug.log`에는 `k2f_chan`이 없었고, 코드 캐시에 `insightjs.com/l.js`도, Local Storage에 `k2f.agent.state`도, `tinyget` 폴더에 페이로드도 없었다. 크롬 DLL 폴더, 레지스트리 키, `%TEMP%`의 `k2f` 파일도 전부 없었다.
+
+변조된 JS는 받았지만 로더가 실제 페이로드를 내려주는 단계까지는 가지 않았던 걸로 보인다. 보고된 최초 감염 시점(10/23~24)보다 내 마지막 실행이 앞섰던 것과도 맞아떨어진다. 그래도 미련 없이 니케는 지웠다.
+
+여기서 얻은 교훈은 "변조 파일을 받았다"와 "감염됐다"를 구분해야 한다는 것이다. 전자는 캐시 ETag로, 후자는 로그·상태 파일·지속성 흔적으로 확인한다. 둘을 섞으면 괜히 OS를 밀거나, 반대로 진짜 감염을 놓친다.
+
+---
+
+## 7. 정리
+
+1. "만료 도메인 때문"이 아니다. 도메인은 공격자가 산 서버 주소일 뿐이고, 진짜 문제는 CDN에 파일을 쓸 수 있는 권한이 넘어갔다는 것이다. 그 경위는 아직 공개되지 않았다.
+2. 공식 경로도 오염될 수 있다. 이번엔 게임 본체가 아니라 런처가 불러오는 웹 스크립트였다. 런처·업데이터가 원격 JS를 실행하는 구조 자체가 공격 표면이다.
+3. 서버 복구 ≠ 내 PC 복구. CDN이 고쳐져도 이미 받은 캐시와 이미 깔린 에이전트는 그대로다.
+4. 백신 결과보다 지표 확인이 확실하다. 경로·레지스트리·로그 문자열로 직접 본다.
+5. 감염됐다면 브라우저에 저장된 모든 것이 노출된 것으로 본다. 특히 코인 지갑 시드는 바꾸는 게 아니라 버리는 것이다.
+
+---
+
+## 참고
+
+- [MotherSphere — NIKKE PC launcher compromise: indicators (GitHub Gist)](https://gist.github.com/MotherSphere/d6c049a09ba8ac3085c51ee9df24a4e5)
+- [WormW — nikke_malware_analysis (GitHub)](https://github.com/WormW/nikke_malware_analysis/blob/main/README.en.md)
+- [MotherSphere — NIKKE-Launcher-Check: incident (GitHub)](https://github.com/MotherSphere/NIKKE-Launcher-Check/blob/main/docs/incident.md)
+- [Inven Global — 'Is My PC Infected?' Nikke Launcher Tampering Concerns: From Attack Vector to Remediation](https://www.invenglobal.com/articles/28122/is-my-pc-infected-nikke-launcher-tampering-concerns-from-attack-vector-to-remediation)
+- [나무위키 — 2026년 승리의 여신: 니케 PC 클라이언트 해킹 사고](https://namu.wiki/w/2026%EB%85%84%20%EC%8A%B9%EB%A6%AC%EC%9D%98%20%EC%97%AC%EC%8B%A0:%20%EB%8B%88%EC%BC%80%20PC%20%ED%81%B4%EB%9D%BC%EC%9D%B4%EC%96%B8%ED%8A%B8%20%ED%95%B4%ED%82%B9%20%EC%82%AC%EA%B3%A0)
+- [ZDNet Korea — '승리의 여신: 니케' PC 런처 파일 변조 정황…사측 "수정 업데이트 진행"](https://zdnet.co.kr/view/?no=20261104135937)
+- [전자신문 — 니케 PC 런처 해킹 의혹... 레벨 인피니트 게임 영향도 촉각](https://www.etnews.com/20261104000227)
+- [디지털애셋 — 니케 악성코드 발견, 가상자산 지갑 28종 탈취 위험](https://www.digitalasset.works/news/articleView.html?idxno=44037)
+- [MTN — 시프트업 '니케' 해킹 의혹 확산](https://news.mtn.co.kr/article/2026110410574629035)
