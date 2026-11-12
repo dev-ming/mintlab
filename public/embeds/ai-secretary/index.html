@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아침 정리는 AI 비서가 합니다</title>
+<!-- Fonts: Tektur (display) · Chakra Petch (body) · Space Mono (HUD).
+     Hangul falls through to Do Hyeon (display) and IBM Plex Sans KR (body/HUD). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@500;700;900&family=Chakra+Petch:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===========================================
+   THEME — 8-Bit Orbit tokens
+   Change colors / fonts here to restyle the whole deck.
+   =========================================== */
+:root{
+  --void:#0A0E27; --navy:#0F1B3D; --cyan:#5EDCF4; --pink:#F0A6CA; --yellow:#F4D03F; --lav:#E2D5F2; --white:#FFFFFF;
+  --body-dark:rgba(255,255,255,.74); --body-light:rgba(15,27,61,.78);
+  --display:'Tektur','Do Hyeon',sans-serif;
+  --body:'Chakra Petch','IBM Plex Sans KR',sans-serif;
+  --mono:'Space Mono','IBM Plex Sans KR',monospace;
+  --stage-bg:#05070f; --slide-bg:var(--void);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   Include this ENTIRE file in every presentation.
+   Slides are authored at 1920×1080 and scaled as a whole.
+   =========================================== */
+
+/* 1. Lock the browser viewport */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 2. Full-window deck viewport */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Keep media inside authored slide bounds */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 6. Presentation chrome stays outside the slide design system */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* 7. Print one fixed-size slide per page */
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .deck-controls {
+        display: none !important;
+    }
+}
+
+/* 8. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+
+
+/* ===========================================
+   SURFACES — dark grid + colored grids, with the
+   always-on grain / scanline / CRT overlay trio
+   =========================================== */
+body{cursor:crosshair}
+.slide,.slide *{word-break:keep-all}
+.slide{font-family:var(--body);color:var(--white);transition:opacity .5s var(--ease),visibility .5s}
+.s-dark{background-color:var(--void);background-image:linear-gradient(rgba(94,220,244,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(94,220,244,.07) 1px,transparent 1px);background-size:40px 40px}
+.s-pink,.s-cyan,.s-lav{color:var(--navy);background-image:linear-gradient(rgba(15,27,61,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(15,27,61,.08) 1px,transparent 1px);background-size:40px 40px}
+.s-pink{background-color:var(--pink)} .s-cyan{background-color:var(--cyan)} .s-lav{background-color:var(--lav)}
+.slide::before{content:'';position:absolute;inset:0;z-index:49;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.slide::after{content:'';position:absolute;inset:0;z-index:50;pointer-events:none;mix-blend-mode:multiply;
+  background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(10,14,39,.05) 2px,rgba(10,14,39,.05) 4px)}
+.crt{position:absolute;inset:0;z-index:51;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(10,14,39,.32) 100%)}
+.stars{position:absolute;inset:0;z-index:1;pointer-events:none}
+.stars i{position:absolute;width:6px;height:6px;animation:twinkle 3s infinite}
+@keyframes twinkle{0%,100%{opacity:.9}50%{opacity:.2}}
+.wrap{position:absolute;inset:0;z-index:10;padding:96px 150px 120px 120px}
+
+/* ===========================================
+   TYPE — Tektur display, Chakra Petch body, Space Mono HUD
+   =========================================== */
+.pill{display:inline-block;background:var(--navy);color:var(--yellow);font:700 18px/1 var(--mono);letter-spacing:.16em;padding:10px 18px;text-transform:uppercase}
+.pill.c{color:var(--cyan)} .pill.p{color:var(--pink)}
+.eyebrow{font:400 20px/1 var(--mono);letter-spacing:.24em;text-transform:uppercase}
+.hero{font:900 156px/1.18 var(--display);letter-spacing:.02em;color:var(--cyan);text-shadow:6px 6px 0 var(--yellow),12px 12px 0 var(--navy)}
+.h1{font:700 76px/1.22 var(--display);letter-spacing:.01em;margin-top:28px}
+.s-dark .h1{color:var(--cyan);text-shadow:4px 4px 0 var(--navy)}
+.h1 .y{color:var(--yellow)} .s-dark .h1 .w{color:var(--white)}
+.lede{font:400 30px/1.7 var(--body);margin-top:24px;max-width:1300px}
+.s-dark .lede{color:var(--body-dark)} .s-pink .lede,.s-cyan .lede,.s-lav .lede{color:var(--body-light)}
+.mono{font-family:var(--mono)}
+b{font-weight:700}
+
+/* ===========================================
+   COMPONENTS — corner brackets, cards, stat tiles, buttons
+   =========================================== */
+.br{position:relative}
+.br::before,.br::after{content:'';position:absolute;width:28px;height:28px;border:4px solid var(--cyan)}
+.br::before{top:-4px;left:-4px;border-right:0;border-bottom:0}
+.br::after{bottom:-4px;right:-4px;border-left:0;border-top:0}
+.br.navy::before,.br.navy::after{border-color:var(--navy)}
+.br.yel::before,.br.yel::after{border-color:var(--yellow)}
+.br.pk::before,.br.pk::after{border-color:var(--pink)}
+.glass{background:rgba(255,255,255,.28);border:2px solid rgba(15,27,61,.22)}
+.tile{background:rgba(94,220,244,.08);border:2px solid rgba(94,220,244,.22)}
+.badge{display:inline-block;border:2px solid var(--yellow);color:var(--yellow);font:400 20px/1 var(--mono);letter-spacing:.1em;padding:12px 20px;text-transform:uppercase}
+.btn{display:inline-block;background:var(--cyan);color:var(--navy);font:700 30px/1 var(--display);letter-spacing:.06em;padding:22px 40px;
+  box-shadow:4px 0 0 0 var(--navy),0 4px 0 0 var(--navy),4px 4px 0 0 var(--navy),8px 4px 0 0 var(--yellow),4px 8px 0 0 var(--yellow),8px 8px 0 0 var(--yellow)}
+.qline{width:80px;height:6px;background:var(--yellow);box-shadow:4px 4px 0 var(--navy)}
+.blank{display:inline-block;min-width:70px;border-bottom:4px solid currentColor;text-align:center}
+
+/* ===========================================
+   ANIMATION — staggered reveal on slide entry
+   =========================================== */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.slide.visible .reveal{opacity:1;transform:none}
+.slide.visible .d1{transition-delay:.1s}.slide.visible .d2{transition-delay:.22s}.slide.visible .d3{transition-delay:.34s}
+.slide.visible .d4{transition-delay:.46s}.slide.visible .d5{transition-delay:.58s}.slide.visible .d6{transition-delay:.7s}
+
+/* ===========================================
+   SLIDE 01 — COVER
+   =========================================== */
+.cover .wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:150px}
+.cover .eyebrow{color:var(--pink)}
+.cover .hero{margin-top:44px}
+.cover .lede{text-align:center;margin-top:52px;font-size:34px}
+.cover .badges{display:flex;gap:28px;margin-top:56px}
+.cover .who{position:absolute;left:120px;right:150px;bottom:64px;display:flex;justify-content:space-between;font:400 20px var(--mono);letter-spacing:.14em;color:rgba(255,255,255,.5)}
+.particle{position:absolute;width:12px;height:12px;z-index:2;animation:float 8s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}
+
+/* ===========================================
+   SLIDE 02 — BEFORE (pink grid, row list)
+   =========================================== */
+.rows{margin-top:40px;display:flex;flex-direction:column;gap:14px}
+.row{display:grid;grid-template-columns:250px 1fr 1fr 190px;align-items:center;gap:32px;padding:16px 32px;background:rgba(255,255,255,.4);border:2px solid rgba(15,27,61,.2);box-shadow:6px 6px 0 rgba(15,27,61,.15)}
+.row.head{background:var(--navy);color:var(--yellow);font:700 18px var(--mono);letter-spacing:.14em;padding:16px 32px;box-shadow:none;border:0}
+.tool{font:700 30px var(--display)}
+.row .t{font:500 26px/1.45 var(--body)}
+.row .m{font:700 30px var(--mono);text-align:right}
+.callout{margin-top:28px;font:500 30px/1.5 var(--body)}
+.callout b{background:var(--navy);color:var(--yellow);padding:2px 12px}
+
+/* ===========================================
+   SLIDE 03 — ARCHITECTURE (4 tools → AI → outputs)
+   =========================================== */
+.arch{position:absolute;left:120px;right:150px;top:340px;height:580px;display:grid;grid-template-columns:420px 1fr 520px;align-items:center}
+.col{display:flex;flex-direction:column;gap:22px}
+.src{padding:22px 28px}
+.src .n{font:700 34px var(--display);color:var(--cyan)}
+.src .d{font:400 22px var(--mono);color:var(--body-dark);margin-top:8px;letter-spacing:.04em}
+.src .new{color:var(--yellow);font:700 16px var(--mono);letter-spacing:.14em;margin-left:12px;vertical-align:middle}
+.hub{justify-self:center;width:400px;padding:40px 30px 34px;background:var(--navy);border:4px solid var(--cyan);text-align:center;box-shadow:8px 8px 0 var(--yellow);position:relative}
+.face{width:150px;height:150px;margin:0 auto;background:var(--void);border:4px solid var(--cyan);position:relative}
+.face i{position:absolute;background:var(--cyan);width:24px;height:24px;top:44px;animation:blink 4s infinite}
+.face i:nth-child(1){left:32px}.face i:nth-child(2){right:32px}
+.face u{position:absolute;left:44px;right:44px;bottom:34px;height:16px;background:var(--pink)}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.hub .t{font:900 46px/1.2 var(--display);color:var(--white);margin-top:24px}
+.hub .s{font:400 20px var(--mono);color:var(--yellow);letter-spacing:.12em;margin-top:10px}
+.wire{position:absolute;height:4px;background:repeating-linear-gradient(90deg,var(--cyan) 0,var(--cyan) 16px,transparent 16px,transparent 24px)}
+.out{padding:20px 26px;background:rgba(244,208,63,.08);border:2px solid rgba(244,208,63,.3)}
+.out .n{font:700 30px var(--display);color:var(--yellow)}
+.out .d{font:400 22px/1.5 var(--body);color:var(--body-dark);margin-top:6px}
+
+/* ===========================================
+   SLIDE 04 — INTEGRATION TABLE (lavender)
+   =========================================== */
+table.px{width:100%;border-collapse:separate;border-spacing:0 14px;margin-top:40px}
+table.px th{background:var(--navy);color:var(--yellow);font:700 18px var(--mono);letter-spacing:.14em;text-align:left;padding:16px 24px;text-transform:uppercase}
+table.px td{background:rgba(255,255,255,.5);border-top:2px solid rgba(15,27,61,.2);border-bottom:2px solid rgba(15,27,61,.2);font:500 24px/1.45 var(--body);padding:20px 24px;vertical-align:top;color:var(--navy)}
+table.px td:first-child{border-left:2px solid rgba(15,27,61,.2);font:700 30px/1.2 var(--display);white-space:nowrap}
+table.px td:last-child{border-right:2px solid rgba(15,27,61,.2);font-weight:700}
+.tag{display:inline-block;font:700 15px var(--mono);letter-spacing:.12em;padding:4px 10px;margin-top:8px;background:var(--navy);color:var(--cyan)}
+.tag.new{color:var(--yellow)}
+.note{margin-top:22px;font:500 24px var(--body);color:var(--body-light)}
+
+/* ===========================================
+   SLIDE 05 — DAY TIMELINE (cyan grid)
+   =========================================== */
+.tl{position:absolute;left:120px;right:150px;top:380px}
+.tl-foot{position:absolute;left:120px;right:150px;bottom:110px;display:flex;align-items:center;gap:28px;font:500 30px/1.5 var(--body);color:var(--navy)}
+.tl-foot b{background:var(--navy);color:var(--yellow);padding:2px 12px}
+.rail{position:absolute;left:0;right:0;top:71px;height:6px;background:repeating-linear-gradient(90deg,var(--navy) 0,var(--navy) 16px,transparent 16px,transparent 24px)}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:28px;position:relative}
+.step .chip{display:inline-block;height:40px;background:var(--navy);color:var(--cyan);font:700 22px/28px var(--mono);padding:6px 14px;letter-spacing:.06em}
+.step .node{position:relative;z-index:1;width:36px;height:36px;background:var(--white);border:6px solid var(--navy);margin:16px 0 28px}
+.step.on .node{background:var(--yellow)}
+.step .n{font:700 44px/1.25 var(--display)}
+.step .d{font:500 27px/1.55 var(--body);color:var(--body-light);margin-top:12px}
+.step .who{display:inline-block;margin-top:22px;font:700 18px var(--mono);letter-spacing:.12em;border:2px solid var(--navy);padding:6px 10px}
+.step .who.h{background:var(--navy);color:var(--yellow)}
+
+/* ===========================================
+   SLIDE 06 — BRIEFING DEMO (terminal)
+   =========================================== */
+.demo{position:absolute;left:120px;top:300px;width:1100px;height:690px;background:#070a1c;border:4px solid var(--cyan);box-shadow:8px 8px 0 var(--yellow)}
+.bar{height:52px;background:var(--cyan);display:flex;align-items:center;gap:12px;padding:0 20px;color:var(--navy);font:700 20px var(--mono);letter-spacing:.08em}
+.bar i{width:16px;height:16px;background:var(--navy)}
+.term{padding:28px 36px;font:400 23px/1.62 var(--mono);color:#cfe7ff;white-space:pre}
+.term .k{color:var(--yellow);font-weight:700}.term .c{color:var(--cyan)}.term .p{color:var(--pink)}.term .g{color:rgba(255,255,255,.45)}
+.notes{position:absolute;left:1290px;right:150px;top:300px;display:flex;flex-direction:column;gap:26px}
+.nt{padding:24px 26px}
+.nt .h{font:700 18px var(--mono);letter-spacing:.14em;color:var(--pink)}
+.nt .b{font:500 25px/1.5 var(--body);color:var(--body-dark);margin-top:10px}
+.cap{position:absolute;left:120px;top:1010px;font:400 18px var(--mono);letter-spacing:.06em;color:rgba(255,255,255,.45)}
+
+/* ===========================================
+   SLIDE 07 — 4D OVERVIEW (pink)
+   =========================================== */
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:60px}
+.d4c{padding:36px 30px;min-height:470px;display:flex;flex-direction:column}
+.d4c .big{font:900 120px/1 var(--display);color:var(--navy);text-shadow:4px 4px 0 var(--white)}
+.d4c .en{font:700 20px var(--mono);letter-spacing:.16em;margin-top:22px}
+.d4c .ko{font:700 40px var(--display);margin-top:6px}
+.d4c .q{font:500 25px/1.55 var(--body);color:var(--body-light);margin-top:20px}
+.d4c .go{margin-top:auto;font:700 17px var(--mono);letter-spacing:.12em}
+
+/* ===========================================
+   SLIDE 08 — DELEGATION MATRIX (dark)
+   =========================================== */
+.mx{margin-top:44px;display:grid;grid-template-columns:1fr 250px 250px 250px;gap:0}
+.mx>div{padding:18px 26px;border-bottom:2px solid rgba(94,220,244,.16);font:500 27px/1.4 var(--body);color:var(--white);display:flex;align-items:center}
+.mx .hd{font:700 18px var(--mono);letter-spacing:.04em;text-align:center;color:var(--navy);justify-content:center;border:0}
+.mx .hd.a{background:var(--cyan)}.mx .hd.b{background:var(--yellow)}.mx .hd.c{background:var(--pink)}.mx .hd.z{background:transparent;color:var(--cyan);justify-content:flex-start}
+.mx .ck{justify-content:center}
+.sq{width:34px;height:34px;box-shadow:4px 0 0 0 var(--navy),0 4px 0 0 var(--navy),4px 4px 0 0 var(--navy)}
+.sq.a{background:var(--cyan)}.sq.b{background:var(--yellow)}.sq.c{background:var(--pink)}
+.mx-foot{margin-top:30px;font:500 26px/1.5 var(--body);color:var(--body-dark)}
+.mx-foot b{color:var(--yellow)}
+
+/* ===========================================
+   SLIDE 09 — DESCRIPTION (tier cards, lavender)
+   =========================================== */
+.tiers{display:grid;grid-template-columns:1fr 1fr 1.12fr;gap:40px;margin-top:72px;align-items:start}
+.tier{background:var(--white);padding:40px 36px;box-shadow:6px 6px 0 rgba(15,27,61,.2);min-height:640px}
+.tier.feat{background:var(--navy);color:var(--white);box-shadow:8px 8px 0 var(--yellow);transform:translateY(-14px)}
+.tier .k{font:700 18px var(--mono);letter-spacing:.16em;color:var(--pink)}
+.tier.feat .k{color:var(--yellow)}
+.tier .n{font:700 54px/1.15 var(--display);margin-top:12px}
+.tier.feat .n{color:var(--cyan)}
+.tier ul{list-style:none;margin-top:26px}
+.tier li{font:500 29px/1.5 var(--body);padding-left:38px;position:relative;margin-bottom:20px;color:var(--body-light)}
+.tier.feat li{color:var(--body-dark)}
+.tier li::before{content:'+';position:absolute;left:0;top:-2px;font:700 28px var(--mono);color:var(--cyan)}
+.tier.feat li.stop::before{content:'■';color:var(--yellow);font-size:22px;top:2px}
+.tier.feat li.stop{color:var(--white)}
+
+/* ===========================================
+   SLIDE 10 — DISCERNMENT + DILIGENCE (dark split)
+   =========================================== */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:60px}
+.panel{padding:44px 44px 44px;min-height:640px}
+.panel .k{font:700 20px var(--mono);letter-spacing:.16em}
+.panel .n{font:700 52px/1.15 var(--display);margin-top:10px}
+.panel.c .k,.panel.c .n{color:var(--cyan)} .panel.p .k,.panel.p .n{color:var(--pink)}
+.panel .s{font:500 28px/1.5 var(--body);color:var(--body-dark);margin-top:14px}
+.items{margin-top:34px;display:flex;flex-direction:column;gap:26px}
+.it{display:grid;grid-template-columns:160px 1fr;gap:18px;align-items:start}
+.it .t{font:700 18px var(--mono);letter-spacing:.04em;background:var(--navy);padding:8px 10px;text-align:center}
+.panel.c .it .t{color:var(--cyan)} .panel.p .it .t{color:var(--pink)}
+.it .b{font:500 28px/1.45 var(--body);color:var(--white)}
+
+/* ===========================================
+   SLIDE 11 — NUMBERS (stat tiles + measure table)
+   =========================================== */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:44px}
+.stat{padding:32px 20px 28px;text-align:center}
+.stat .v{font:900 84px/1 var(--display);color:var(--cyan);text-shadow:4px 4px 0 var(--navy)}
+.stat .l{font:700 18px/1.5 var(--mono);color:var(--pink);letter-spacing:.06em;margin-top:16px}
+.meas{margin-top:44px;display:grid;grid-template-columns:1fr 200px 200px 1fr;border-top:4px solid var(--cyan)}
+.meas>div{padding:14px 22px;border-bottom:2px solid rgba(94,220,244,.16);font:500 24px/1.4 var(--body);color:var(--white)}
+.meas .h{font:700 17px var(--mono);letter-spacing:.14em;color:var(--yellow)}
+.meas .v{font:700 26px var(--mono);color:var(--cyan);text-align:center}
+.meas .m{color:var(--body-dark);font-size:22px}
+
+/* ===========================================
+   SLIDE 12 — ROLLOUT + CLOSE (CTA)
+   =========================================== */
+.close .wrap{padding-top:90px}
+.close .hero{font-size:104px;line-height:1.28;margin-top:30px}
+.roll{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:64px}
+.ro{padding:26px 26px 24px}
+.ro .k{font:700 17px var(--mono);letter-spacing:.14em;color:var(--yellow)}
+.ro .n{font:700 32px/1.25 var(--display);color:var(--white);margin-top:10px}
+.ro .d{font:500 24px/1.5 var(--body);color:var(--body-dark);margin-top:10px}
+.land{position:absolute;left:0;right:0;bottom:0;height:150px;z-index:3;display:flex;align-items:flex-end;opacity:.35}
+.land i{flex:1;background:var(--cyan)}
+.close .who{position:absolute;left:120px;right:150px;bottom:60px;z-index:11;display:flex;justify-content:space-between;align-items:center;font:400 20px var(--mono);letter-spacing:.12em;color:rgba(255,255,255,.7)}
+
+/* ===========================================
+   PERSISTENT CHROME (outside the stage)
+   =========================================== */
+.dots{position:fixed;right:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:1000}
+.dots button{width:14px;height:14px;border:2px solid var(--cyan);background:transparent;cursor:pointer;padding:0;position:relative}
+.dots button.on::after{content:'';position:absolute;inset:2px;background:var(--cyan)}
+.count{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:1000;font:400 13px var(--mono);letter-spacing:.15em;color:var(--cyan);background:rgba(15,27,61,.85);padding:6px 14px}
+.hint{position:fixed;right:22px;bottom:18px;z-index:1000;font:400 11px var(--mono);letter-spacing:.15em;color:rgba(94,220,244,.5)}
+
+/* ===========================================
+   INLINE EDITING (press E or hover top-left)
+   =========================================== */
+.edit-hotzone{position:fixed;top:0;left:0;width:80px;height:80px;z-index:10000;cursor:pointer}
+.edit-toggle{position:fixed;top:16px;left:16px;z-index:10001;opacity:0;pointer-events:none;transition:opacity .3s;
+  font:700 12px var(--mono);letter-spacing:.12em;background:var(--yellow);color:var(--navy);border:0;padding:10px 14px;cursor:pointer}
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto}
+body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);outline-offset:4px}
+@media print{.dots,.count,.hint,.edit-hotzone,.edit-toggle{display:none!important}}
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ========== 01 COVER ========== -->
+<section class="slide s-dark cover active" data-title="표지">
+  <div class="stars" data-n="70"></div><div class="crt"></div>
+  <i class="particle" style="left:220px;top:300px;background:var(--pink)"></i>
+  <i class="particle" style="left:1640px;top:240px;background:var(--yellow);animation-delay:-3s"></i>
+  <i class="particle" style="left:1500px;top:820px;background:var(--cyan);animation-delay:-5s"></i>
+  <div class="wrap">
+    <div class="eyebrow reveal">제1회 천하제일 AI 활용 업무개선 사례공모전</div>
+    <h1 class="hero reveal d1" style="font-size:140px">아침 정리는<br>AI 비서가 합니다</h1>
+    <p class="lede reveal d2">Claude Code에 Jira, Sentry, 구글 캘린더, Slack을 연결해서 쓰고 있는 방법</p>
+    <div class="badges reveal d3"><span class="badge">MCP 4개 연동</span><span class="badge">CLAUDE CODE</span><span class="badge">쓰기는 확인 후 실행</span></div>
+  </div>
+  <div class="who reveal d4"><span>프론트엔드 개발 · 민지</span><span>2026.11</span></div>
+</section>
+
+<!-- ========== 02 BEFORE ========== -->
+<section class="slide s-pink" data-title="Before">
+  <div class="wrap">
+    <span class="pill reveal">01 · 기존 방식</span>
+    <h2 class="h1 reveal d1">매일 아침 탭 4개를 열어서 확인했습니다</h2>
+    <div class="rows">
+      <div class="row head reveal d2"><span>도구</span><span>하던 일</span><span>문제</span><span style="text-align:right">분/일</span></div>
+      <div class="row reveal d2"><span class="tool">Jira</span><span class="t">내 일감, 릴리즈 버전별 남은 일 확인</span><span class="t">필터를 매번 다시 걸어서 봄. 마감 가까운 건 가끔 놓침</span><span class="m"><span class="blank">__</span></span></div>
+      <div class="row reveal d3"><span class="tool">Sentry</span><span class="t">밤새 생긴 운영 오류 확인</span><span class="t">Jira에 이미 있는지 하나씩 찾아봄. 중복 티켓 만든 적 있음</span><span class="m"><span class="blank">__</span></span></div>
+      <div class="row reveal d3"><span class="tool">Calendar</span><span class="t">회의, 보고 일정 확인</span><span class="t">개발할 수 있는 시간은 머릿속으로 계산</span><span class="m"><span class="blank">__</span></span></div>
+      <div class="row reveal d4"><span class="tool">Slack</span><span class="t">멘션, DM, 스레드 확인</span><span class="t">답해야 하는 것과 참고용이 섞여서 빠뜨림</span><span class="m"><span class="blank">__</span></span></div>
+      <div class="row reveal d4"><span class="tool">퇴근 기록</span><span class="t">Jira 댓글, 업무일지</span><span class="t">하루 끝나고 기억나는 대로 작성</span><span class="m"><span class="blank">__</span></span></div>
+    </div>
+    <p class="callout reveal d5">다 따로 보다 보니 <b>뭐부터 할지</b> 정하는 데만 매일 시간이 꽤 들었습니다.</p>
+  </div>
+</section>
+
+<!-- ========== 03 ARCHITECTURE ========== -->
+<section class="slide s-dark" data-title="구성">
+  <div class="stars" data-n="30"></div><div class="crt"></div>
+  <div class="wrap">
+    <span class="pill c reveal">02 · 바꾼 방식</span>
+    <h2 class="h1 reveal d1">네 군데 볼 걸 <span class="y">브리핑 하나</span>로 합쳤습니다</h2>
+  </div>
+  <div class="arch">
+    <div class="col">
+      <div class="src tile br reveal d2"><div class="n">Jira</div><div class="d">일감 · 릴리즈 · 마감</div></div>
+      <div class="src tile br reveal d2"><div class="n">Sentry</div><div class="d">신규 · 급증 오류</div></div>
+      <div class="src tile br reveal d3"><div class="n">Calendar<span class="new">NEW</span></div><div class="d">회의 · 보고 · 빈 시간</div></div>
+      <div class="src tile br reveal d3"><div class="n">Slack<span class="new">NEW</span></div><div class="d">멘션 · DM · 미응답</div></div>
+    </div>
+    <div class="hub reveal d4">
+      <div class="face"><i></i><i></i><u></u></div>
+      <div class="t">AI 비서</div>
+      <div class="s">CLAUDE CODE + MCP</div>
+      <div class="s" style="color:var(--pink)">/morning</div>
+    </div>
+    <div class="col">
+      <div class="out br yel reveal d5"><div class="n">오늘 꼭 할 일</div><div class="d">릴리즈 일정 기준으로 3개까지</div></div>
+      <div class="out br yel reveal d5"><div class="n">시간표 제안</div><div class="d">빈 시간에 일감 배치, OK하면 캘린더 등록</div></div>
+      <div class="out br yel reveal d6"><div class="n">Slack 정리</div><div class="d">답장 필요 / 읽기만 / 일감으로 만들 것</div></div>
+      <div class="out br yel reveal d6"><div class="n">확인 필요</div><div class="d">확실하지 않은 건 따로 빼서 표시</div></div>
+    </div>
+    <div class="wire" style="left:430px;width:150px;top:288px"></div>
+    <div class="wire" style="right:530px;width:150px;top:288px"></div>
+  </div>
+</section>
+
+<!-- ========== 04 INTEGRATION TABLE ========== -->
+<section class="slide s-lav" data-title="연동">
+  <div class="wrap">
+    <span class="pill reveal">03 · 연동</span>
+    <h2 class="h1 reveal d1">읽기는 자동, 쓰기는 제가 확인하고 실행</h2>
+    <table class="px reveal d2">
+      <tr><th style="width:250px">도구</th><th>AI가 보는 것</th><th>AI가 하는 것</th><th style="width:300px">제가 확인하는 것</th></tr>
+      <tr><td>Jira<br><span class="tag">운영 중</span></td><td>내 일감, 상태, 릴리즈별 남은 일과 마감</td><td>우선순위 정리, 진행중 전환, 작업 댓글 초안</td><td>완료 처리, 댓글 올리기</td></tr>
+      <tr><td>Sentry<br><span class="tag">운영 중</span></td><td>최근 24시간 새 오류, 갑자기 늘어난 오류</td><td>기존 티켓과 겹치는지 보고 버그 티켓 초안</td><td>티켓 생성</td></tr>
+      <tr><td>Calendar<br><span class="tag new">신규</span></td><td>오늘, 이번 주 회의와 보고 일정, 빈 시간</td><td>작업 시간 블록 제안, 보고 · 릴리즈 리마인드</td><td>일정 추가, 수정</td></tr>
+      <tr><td>Slack<br><span class="tag new">신규</span></td><td>나를 멘션한 메시지, DM, 답 안 한 스레드</td><td>답장 필요 / 읽기만 / 일감화로 나누고 답장 초안</td><td>메시지 보내기</td></tr>
+    </table>
+    <p class="note reveal d3">전부 MCP로 Claude Code에 붙였습니다. 캘린더와 Slack은 회사 계정이라 OAuth 연동 전에 보안 담당자 확인을 받습니다.</p>
+  </div>
+</section>
+
+<!-- ========== 05 DAY FLOW ========== -->
+<section class="slide s-cyan" data-title="하루 흐름">
+  <div class="wrap">
+    <span class="pill reveal">04 · 하루 흐름</span>
+    <h2 class="h1 reveal d1">하루를 이렇게 씁니다</h2>
+  </div>
+  <div class="tl">
+    <div class="rail"></div>
+    <div class="steps">
+      <div class="step on reveal d2"><span class="chip">출근</span><div class="node"></div><div class="n">출근 브리핑</div><div class="d"><span class="mono">/morning</span> 실행하면 네 군데를 읽고 한 화면으로 정리. 예약 실행이나 SessionStart 훅으로 자동 실행</div><span class="who">AI</span></div>
+      <div class="step reveal d3"><span class="chip">+10분</span><div class="node"></div><div class="n">시간표 확정</div><div class="d">빈 시간에 일감 넣은 안을 보고 괜찮으면 캘린더에 등록</div><span class="who h">제가 확인</span></div>
+      <div class="step reveal d4"><span class="chip">오전·오후</span><div class="node"></div><div class="n">작업</div><div class="d">원래 쓰던 구현 → 리뷰 → QA → 커밋 에이전트 그대로</div><span class="who">같이</span></div>
+      <div class="step reveal d5"><span class="chip">점심 후</span><div class="node"></div><div class="n">중간 점검</div><div class="d">새로 생긴 Sentry 오류와 Slack 멘션만 다시 확인</div><span class="who">AI</span></div>
+      <div class="step on reveal d6"><span class="chip">퇴근</span><div class="node"></div><div class="n">퇴근 정리</div><div class="d">한 일, 못 한 일, 내일 할 일 정리. Jira 댓글과 업무일지 초안까지</div><span class="who h">제가 확인</span></div>
+    </div>
+  </div>
+  <div class="tl-foot reveal d6"><span class="pill">직접 확인</span><span>제가 손대는 건 <b>아침 시간표</b>와 <b>저녁 기록</b>, 하루 두 번입니다.</span></div>
+</section>
+
+<!-- ========== 06 BRIEFING DEMO ========== -->
+<section class="slide s-dark" data-title="데모">
+  <div class="stars" data-n="20"></div><div class="crt"></div>
+  <div class="wrap">
+    <span class="pill p reveal">05 · 실제 화면</span>
+    <h2 class="h1 reveal d1">출근해서 제일 먼저 보는 화면</h2>
+  </div>
+  <div class="demo reveal d2">
+    <div class="bar"><i></i><i></i><i></i><span style="margin-left:12px">~/morning — claude</span></div>
+<div class="term"><span class="k">☀ 11/13(금) 출근 브리핑</span>
+
+<span class="c">[오늘 꼭]</span> 릴리즈 v2.4 코드프리즈 D-2 — 잔여 3건
+  1. FE-101 결제 화면 다국어 누락 <span class="g">(진행중)</span>
+  2. FE-102 <span class="p">[Sentry 신규]</span> 상세 페이지 TypeError, 24h 132건
+     → 티켓 초안 있음, 등록할까요? <span class="k">[y/n]</span>
+  3. FE-103 배너 디자인 QA 반영
+
+<span class="c">[일정]</span>   10:00 스탠드업 · 14:00 기획 리뷰 · 17:00 주간 보고
+<span class="c">[시간표]</span> 10:30 FE-101 · 13:00 FE-102 · 15:00 FE-103
+
+<span class="c">[Slack]</span>  답해야 함 2 · 읽기만 5 (요약 보기)
+
+<span class="k">⚠ 확인 필요</span> FE-102는 어제 배포와 시점이 겹침.
+  <span class="g">원인 추정이니 재현 후 확정하세요.</span></div>
+  </div>
+  <div class="notes">
+    <div class="nt tile br pk reveal d3"><div class="h">출처</div><div class="b">항목마다 Jira, Sentry, Slack 원문 링크가 붙어 있어서 바로 확인 가능</div></div>
+    <div class="nt tile br pk reveal d4"><div class="h">멈춤</div><div class="b">티켓 생성, 일정 등록, 메시지 발송은 <b>[y/n]</b>에서 멈추고 제 답을 기다림</div></div>
+    <div class="nt tile br pk reveal d5"><div class="h">추정 표시</div><div class="b">원인이 확실하지 않으면 "추정"이라고 써둠. 확정은 제가 재현해보고 함</div></div>
+  </div>
+  <div class="cap reveal d5">* 예시 화면입니다. 일감 번호와 내용은 실제가 아닙니다.</div>
+</section>
+
+<!-- ========== 07 4D OVERVIEW ========== -->
+<section class="slide s-pink" data-title="원칙">
+  <div class="wrap">
+    <span class="pill reveal">06 · 원칙</span>
+    <h2 class="h1 reveal d1">만들면서 지킨 원칙 네 가지</h2>
+    <div class="four">
+      <div class="d4c glass br navy reveal d2"><div class="big">01</div><div class="en">RULE 01</div><div class="ko">나눠 맡기기</div><div class="q">정보 모으기, 대조, 초안은 AI. 결정과 원인 확정은 제가.</div><div class="go">→ 위임 기준</div></div>
+      <div class="d4c glass br navy reveal d3"><div class="big">02</div><div class="en">RULE 02</div><div class="ko">구체적으로 지시</div><div class="q">지시문을 Product, Process, Behavior로 나눠 쓰고 멈출 지점을 적어둠.</div><div class="go">→ 지시문 구성</div></div>
+      <div class="d4c glass br navy reveal d4"><div class="big">03</div><div class="en">RULE 03</div><div class="ko">결과 의심하기</div><div class="q">AI가 자신 있게 말해도 그대로 안 믿음. 출처 링크, 추정 표시, 교차 검증.</div><div class="go">→ 실제로 잡은 사례</div></div>
+      <div class="d4c glass br navy reveal d5"><div class="big">04</div><div class="en">RULE 04</div><div class="ko">책임은 사람이</div><div class="q">쓰기는 확인 후 실행. 사고 나면 규칙으로 남기고, AI가 쓴 건 표시.</div><div class="go">→ 안전장치</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 08 DELEGATION ========== -->
+<section class="slide s-dark" data-title="나눠 맡기기">
+  <div class="stars" data-n="20"></div><div class="crt"></div>
+  <div class="wrap">
+    <span class="pill reveal">원칙 01 · 나눠 맡기기</span>
+    <h2 class="h1 reveal d1">AI한테 넘기는 것과 <span class="w">사람이 처리하는 것</span></h2>
+    <div class="mx reveal d2">
+      <div class="hd z">일</div><div class="hd a">AI</div><div class="hd b">AI 제안 → 제가 확인</div><div class="hd c">사람이 처리</div>
+      <div>일감, 일정, 메시지 모으기</div><div class="ck"><i class="sq a"></i></div><div class="ck"></div><div class="ck"></div>
+      <div>Sentry 오류가 Jira에 있는지 대조</div><div class="ck"><i class="sq a"></i></div><div class="ck"></div><div class="ck"></div>
+      <div>버그 티켓 생성</div><div class="ck"></div><div class="ck"><i class="sq b"></i></div><div class="ck"></div>
+      <div>오늘 시간표 짜서 캘린더 등록</div><div class="ck"></div><div class="ck"><i class="sq b"></i></div><div class="ck"></div>
+      <div>Slack 답장, Jira 댓글</div><div class="ck"></div><div class="ck"><i class="sq b"></i></div><div class="ck"></div>
+      <div>버그 원인 확정, 우선순위 최종 결정</div><div class="ck"></div><div class="ck"></div><div class="ck"><i class="sq c"></i></div>
+      <div>푸시, 완료 처리, BE 코드 수정</div><div class="ck"></div><div class="ck"></div><div class="ck"><i class="sq c"></i></div>
+    </div>
+    <p class="mx-foot reveal d3">기준은 간단합니다. <b>되돌리기 어렵거나 다른 사람한테 가는 작업</b>은 제가 확인하고 실행합니다.</p>
+  </div>
+</section>
+
+<!-- ========== 09 DESCRIPTION ========== -->
+<section class="slide s-lav" data-title="지시문">
+  <div class="wrap">
+    <span class="pill reveal">원칙 02 · 구체적으로 지시</span>
+    <h2 class="h1 reveal d1">/morning 지시문은 이렇게 나눠서 썼습니다</h2>
+    <div class="tiers">
+      <div class="tier reveal d2"><div class="k">PRODUCT</div><div class="n">뭘 만들지</div><ul>
+        <li>한 화면짜리 브리핑</li><li>오늘 꼭 할 일은 3개까지</li><li>일정, 시간표 제안, Slack 정리</li><li>항목마다 출처 링크 달기</li></ul></div>
+      <div class="tier reveal d3"><div class="k">PROCESS</div><div class="n">어떤 순서로</div><ul>
+        <li>Jira → Sentry → 캘린더 → Slack 순서로 읽기</li><li>Sentry 오류는 기존 티켓과 겹치는지 먼저 확인</li><li>빈 시간 계산해서 일감 배치</li><li>릴리즈 마감과 우선순위로 정렬</li></ul></div>
+      <div class="tier feat reveal d4"><div class="k">BEHAVIOR · 멈출 지점</div><div class="n">어떻게 행동할지</div><ul>
+        <li>읽기는 마음대로 해도 됨</li>
+        <li class="stop">티켓 생성, 일정 등록, 메시지 발송 전에는 멈추고 물어보기</li>
+        <li class="stop">확실하지 않으면 "추정"이라고 쓰기</li>
+        <li class="stop">도구 하나가 안 되면 추측으로 채우지 말고 비워두고 알려주기</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 10 DISCERNMENT + DILIGENCE ========== -->
+<section class="slide s-dark" data-title="검증 · 책임">
+  <div class="stars" data-n="20"></div><div class="crt"></div>
+  <div class="wrap">
+    <span class="pill c reveal">원칙 03 · 04</span>
+    <h2 class="h1 reveal d1">AI 말을 그대로 안 믿고, <span class="w">마지막 확인은 제가</span></h2>
+    <div class="split">
+      <div class="panel tile br c reveal d2"><div class="k">원칙 03</div><div class="n">결과 의심하기</div>
+        <div class="s">AI 결과를 의심해보고 실제로 잡아낸 것들</div>
+        <div class="items">
+          <div class="it"><span class="t">정책 수치</span><span class="b">화면에 나가는 유예 기간이 7일로 돼 있었는데, BE 상수와 맞춰보니 10일이 맞았음</span></div>
+          <div class="it"><span class="t">원인 확정</span><span class="b">운영 DOM 오류 원인이 브라우저 번역기인 걸 확인하고 일감 4개로 나눔</span></div>
+          <div class="it"><span class="t">교차 검증</span><span class="b">구현 에이전트 결과를 리뷰·QA 에이전트가 따로 검증. 리뷰·QA는 수정 권한 없음</span></div>
+        </div></div>
+      <div class="panel tile br pk p reveal d3"><div class="k">원칙 04</div><div class="n">책임은 사람이</div>
+        <div class="s">결과 책임은 제가 지는 구조</div>
+        <div class="items">
+          <div class="it"><span class="t">확인 후 실행</span><span class="b">쓰기 작업은 전부 제가 확인. 푸시와 완료 처리는 제가 직접</span></div>
+          <div class="it"><span class="t">규칙 누적</span><span class="b">사고가 한 번 나면 규칙으로 저장해서 다음부터 자동 적용. 메모리 파일 106개</span></div>
+          <div class="it"><span class="t">공개</span><span class="b">커밋엔 Co-Authored-By, Jira 댓글엔 AI 작성 표시</span></div>
+          <div class="it"><span class="t">데이터</span><span class="b">연동 범위는 내 멘션, DM, 내 캘린더까지만. 사내 정책도 확인</span></div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 11 NUMBERS ========== -->
+<section class="slide s-dark" data-title="효과">
+  <div class="stars" data-n="20"></div><div class="crt"></div>
+  <div class="wrap">
+    <span class="pill reveal">07 · 효과</span>
+    <h2 class="h1 reveal d1">지금까지 쌓인 기록과 <span class="w">앞으로 잴 것</span></h2>
+    <div class="stats">
+      <div class="stat tile br reveal d2"><div class="v" data-count="800">800</div><div class="l">CLAUDE 공동 작성 커밋<br>(2026-05-15~)</div></div>
+      <div class="stat tile br reveal d2"><div class="v" data-count="448">448</div><div class="l">커밋에 연결된<br>JIRA 일감</div></div>
+      <div class="stat tile br reveal d3"><div class="v" data-count="106">106</div><div class="l">누적된<br>메모리 파일</div></div>
+      <div class="stat tile br reveal d3"><div class="v" data-count="151">151</div><div class="l">E2E 테스트<br>항목</div></div>
+    </div>
+    <div class="meas reveal d4">
+      <div class="h">지표</div><div class="h" style="text-align:center">BEFORE</div><div class="h" style="text-align:center">AFTER</div><div class="h">측정 방법</div>
+      <div>출근 → 첫 작업 시작 (분)</div><div class="v">__</div><div class="v">__</div><div class="m">스톱워치 1–2회</div>
+      <div>퇴근 기록 · Jira 댓글 (분/일)</div><div class="v">__</div><div class="v">__</div><div class="m">체감 + 스톱워치</div>
+      <div>Sentry 오류 → 티켓화 (시간)</div><div class="v">__</div><div class="v">__</div><div class="m">이슈 발생 vs Jira 생성 시각</div>
+      <div>중복 티켓 생성 (건)</div><div class="v">__</div><div class="v">0</div><div class="m">Jira 기록</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 12 ROLLOUT + CLOSE ========== -->
+<section class="slide s-dark close" data-title="확산">
+  <div class="stars" data-n="60"></div><div class="crt"></div>
+  <div class="land" id="land"></div>
+  <div class="wrap">
+    <span class="pill p reveal">08 · 다른 팀에서도</span>
+    <h2 class="hero reveal d1">다른 직군도<br>그대로 쓸 수 있습니다</h2>
+    <div class="roll">
+      <div class="ro tile br reveal d2"><div class="k">직군별 변형</div><div class="n">연결 도구만 바꾸면 됨</div><div class="d">기획: Jira+Slack+캘린더<br>QA: Jira+Sentry<br>디자인: Figma+Slack</div></div>
+      <div class="ro tile br reveal d3"><div class="k">템플릿 공개</div><div class="n">/morning 묶어서 공유</div><div class="d">스킬, 위임 기준표, 지시문 양식을 플러그인으로</div></div>
+      <div class="ro tile br reveal d4"><div class="k">안전 기본값</div><div class="n">확인 절차 기본 포함</div><div class="d">쓰기 전 확인, 최소 연동 범위가 처음부터 들어가 있음</div></div>
+      <div class="ro tile br reveal d5"><div class="k">온보딩</div><div class="n">30분이면 첫 브리핑</div><div class="d">제가 써둔 AI 활용 가이드 7편 보고 따라하기</div></div>
+    </div>
+  </div>
+  <div class="who reveal d6"><span>#AI로_일하는_방식을_바꾸다</span><span>프론트엔드 개발 · 민지 · 2026.11</span></div>
+</section>
+
+</main>
+</div>
+
+<nav class="dots" id="dots" aria-label="슬라이드 이동"></nav>
+<div class="count" id="count">01 / 12</div>
+<div class="hint">← → / SPACE</div>
+<div class="edit-hotzone" id="hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="편집 모드 (E)">EDIT · E</button>
+
+<script>
+/* ===========================================
+   DECORATION — deterministic starfield + horizon
+   =========================================== */
+(function(){
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const cols = ['#5EDCF4','#F4D03F','#F0A6CA'];
+  document.querySelectorAll('.stars').forEach(box => {
+    const n = +box.dataset.n || 30;
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('i');
+      s.style.left = (rnd() * 1920) + 'px'; s.style.top = (rnd() * 1080) + 'px';
+      s.style.background = cols[i % 3]; s.style.opacity = (.3 + rnd() * .6).toFixed(2);
+      s.style.animationDelay = (-rnd() * 3).toFixed(2) + 's';
+      box.appendChild(s);
+    }
+  });
+  const land = document.getElementById('land');
+  for (let i = 0; i < 48; i++) { const b = document.createElement('i'); b.style.height = (20 + Math.round(rnd() * 8) * 16) + 'px'; land.appendChild(b); }
+})();
+
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Keyboard, wheel, touch, dot rail; fixed 1920×1080 stage scaling.
+   =========================================== */
+class SlidePresentation {
+  constructor() {
+    this.slides = [...document.querySelectorAll('.slide')];
+    this.stage = document.getElementById('deckStage');
+    this.current = 0; this.lock = false;
+    this.buildDots(); this.scale(); this.bind(); this.go(0);
+  }
+  scale() {
+    const fit = () => {
+      const f = Math.min(innerWidth / 1920, innerHeight / 1080);
+      this.stage.style.transform = `translate(${(innerWidth - 1920 * f) / 2}px, ${(innerHeight - 1080 * f) / 2}px) scale(${f})`;
+    };
+    fit(); addEventListener('resize', fit);
+  }
+  buildDots() {
+    const nav = document.getElementById('dots');
+    this.dots = this.slides.map((s, i) => {
+      const b = document.createElement('button'); b.setAttribute('aria-label', `${i + 1}. ${s.dataset.title}`);
+      b.onclick = () => this.go(i); nav.appendChild(b); return b;
+    });
+  }
+  bind() {
+    addEventListener('keydown', e => {
+      if (document.body.classList.contains('editing')) return;
+      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); this.go(this.current + 1); }
+      if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); this.go(this.current - 1); }
+      if (e.key === 'Home') this.go(0);
+      if (e.key === 'End') this.go(this.slides.length - 1);
+    });
+    addEventListener('wheel', e => {
+      if (this.lock || document.body.classList.contains('editing')) return;
+      this.lock = true; setTimeout(() => this.lock = false, 800);
+      this.go(this.current + (e.deltaY > 0 ? 1 : -1));
+    }, { passive: true });
+    let y0 = null, x0 = null;
+    addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    addEventListener('touchend', e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      const d = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(d) > 50) this.go(this.current + (d < 0 ? 1 : -1));
+      x0 = y0 = null;
+    });
+  }
+  go(i) {
+    this.current = Math.max(0, Math.min(i, this.slides.length - 1));
+    this.slides.forEach((s, k) => { s.classList.toggle('active', k === this.current); s.classList.toggle('visible', k === this.current); });
+    this.dots.forEach((d, k) => d.classList.toggle('on', k === this.current));
+    document.getElementById('count').textContent = `${String(this.current + 1).padStart(2, '0')} / ${String(this.slides.length).padStart(2, '0')}`;
+    this.count(this.slides[this.current]);
+  }
+  count(slide) {   // stat numerals count up on entry
+    slide.querySelectorAll('[data-count]').forEach(el => {
+      const end = +el.dataset.count, t0 = performance.now();
+      const step = t => { const p = Math.min((t - t0) / 900, 1); el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) el.textContent = end; else requestAnimationFrame(step);
+    });
+  }
+}
+window.deck = new SlidePresentation();
+
+/* ===========================================
+   INLINE EDITOR — E key or top-left hover; Ctrl/Cmd+S downloads the edited file
+   =========================================== */
+const editor = {
+  isActive: false,
+  sel: '.slide h1,.slide h2,.slide p,.slide li,.slide .n,.slide .d,.slide .q,.slide .b,.slide .t,.slide .l,.slide .row span,.slide td,.slide .mx>div,.slide .meas>div,.slide .badge,.slide .pill,.slide .eyebrow,.slide .who span,.slide .term',
+  toggleEditMode() {
+    this.isActive = !this.isActive;
+    document.body.classList.toggle('editing', this.isActive);
+    document.getElementById('editToggle').classList.toggle('active', this.isActive);
+    document.querySelectorAll(this.sel).forEach(el => el.setAttribute('contenteditable', this.isActive ? 'true' : 'false'));
+  },
+  save() {
+    if (this.isActive) this.toggleEditMode();
+    document.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+    document.querySelectorAll('.stars i,#land i,#dots button').forEach(el => el.remove());
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    a.download = 'ai-secretary-8bit.html'; a.click(); setTimeout(() => location.reload(), 300);
+  }
+};
+const hotzone = document.getElementById('hotzone'), editToggle = document.getElementById('editToggle'); let hideT = null;
+editToggle.addEventListener('click', () => editor.toggleEditMode());
+hotzone.addEventListener('click', () => editor.toggleEditMode());
+hotzone.addEventListener('mouseenter', () => { clearTimeout(hideT); editToggle.classList.add('show'); });
+hotzone.addEventListener('mouseleave', () => { hideT = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
+editToggle.addEventListener('mouseenter', () => clearTimeout(hideT));
+editToggle.addEventListener('mouseleave', () => { hideT = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
+document.addEventListener('keydown', e => {
+  if ((e.key === 'e' || e.key === 'E') && !e.target.isContentEditable) editor.toggleEditMode();
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); editor.save(); }
+});
+</script>
+</body>
+</html>
