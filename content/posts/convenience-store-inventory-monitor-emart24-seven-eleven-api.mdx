@@ -30,11 +30,11 @@ excerpt: "이마트24와 세븐일레븐 웹뷰 API를 분석해 점포별 실�
 
 페이지 안의 jQuery를 읽으니 엔드포인트가 세 개였다.
 
-| 용도 | 엔드포인트 |
-|---|---|
-| 주변 점포 | `POST /store/getNearStoreList` (lat, lon, pageCnt, order_by=distance) |
-| 상품 검색 | `POST /stock/stock/search` (searchWord, currentPage) |
-| 점포별 재고 | `GET /api/stock/v2/stock-search/store` (searchPluCode, bizNoArr) |
+| 용도     | 엔드포인트                                                                 |
+| ------ | --------------------------------------------------------------------- |
+| 주변 점포  | `POST /store/getNearStoreList` (lat, lon, pageCnt, order_by=distance) |
+| 상품 검색  | `POST /stock/stock/search` (searchWord, currentPage)                  |
+| 점포별 재고 | `GET /api/stock/v2/stock-search/store` (searchPluCode, bizNoArr)      |
 
 ### 30분을 날린 함정: charset
 
