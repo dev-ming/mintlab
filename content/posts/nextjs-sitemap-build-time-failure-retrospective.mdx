@@ -1,5 +1,5 @@
 ---
-title: "사이트맵에 상세 페이지가 하나도 없던 이유 — 회고"
+title: "사이트맵에 상세 페이지가 하나도 없던 이유"
 date: "2026-08-05"
 tags: ["nextjs","sitemap","serverless","isr","networking","retrospective"]
 category: "log"
@@ -39,7 +39,7 @@ export default async function sitemap() {
 
 ---
 
-## 1막: 틀린 가설을 빨리 버리기
+## 1. 틀린 가설을 빨리 버리기
 
 가장 그럴듯한 가설은 "빌드 환경에 API 주소 환경변수가 없다"였다. 그러면 기본값(`localhost`)으로 떨어져 전부 실패하니까 증상과 맞는다.
 
@@ -63,7 +63,7 @@ curl -s https://example.com/ | grep -oE 'src="/_next/static/chunks/[^"]+"' | hea
 
 ---
 
-## 2막: 진짜 원인은 "언제 만들어지는가"였다
+## 2. 진짜 원인은 "언제 만들어지는가"였다
 
 빌드 로그의 라우트 표를 다시 봤다.
 
@@ -87,7 +87,7 @@ Route (app)                     Revalidate  Expire
 
 ---
 
-## 3막: 고친 것
+## 3. 고친 것
 
 ### 요청 시점 생성으로 전환
 
@@ -136,7 +136,7 @@ if (!res.ok) {
 
 ---
 
-## 4막: 개발환경은 되는데 운영은 안 되는 이유
+## 4. 개발환경은 되는데 운영은 안 되는 이유
 
 고치고 배포했더니 개발 환경 사이트맵은 21개 → 156개가 됐다. 그런데 스테이징은 그대로 21개였다.
 

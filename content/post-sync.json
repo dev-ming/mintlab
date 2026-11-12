@@ -104,8 +104,15 @@
     "category": "guide",
     "excerpt": "Windows에서 국기 이모지가 알파벳 두 글자로 보이는 원인을 유니코드와 폰트 렌더링 관점에서 분석하고, 전용 폰트와 unicode-range로 해결하는 방법을 정리한 가이드."
   },
-  "빌드 때 굳어버린 사이트맵 — 회고.md": {
+  "이모지가 어떤 유저에게만 깨져 보였다 — 웹폰트로 해결한 회고.md": {
+    "slug": "cross-platform-emoji-webfont-rendering-retrospective",
+    "tags": ["emoji", "webfont", "unicode", "colrv1", "css", "cross-platform"],
+    "category": "log",
+    "excerpt": "운영체제별 이모지 폰트 차이로 일부 사용자에게 문자와 국기가 깨지던 문제를 진단하고, COLRv1 웹폰트와 unicode-range로 해결한 회고."
+  },
+  "사이트맵에 상세 페이지가 하나도 없던 이유.md": {
     "slug": "nextjs-sitemap-build-time-failure-retrospective",
+    "date": "2026-08-05",
     "tags": ["nextjs", "sitemap", "serverless", "isr", "networking", "retrospective"],
     "category": "log",
     "excerpt": "빌드 시점의 일시적인 API 실패가 빈 사이트맵으로 굳어진 원인을 추적하고, 동적 생성과 관측 가능한 폴백으로 개선한 회고."
