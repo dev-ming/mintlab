@@ -1007,14 +1007,20 @@
       flex-direction: column
     }
 
+    /* hover uses `translate` (not `transform`) so it can skip the reveal stagger delay */
     .d4c[data-goto] {
       cursor: pointer;
-      transition: opacity .6s var(--ease), transform .2s, box-shadow .2s
+      transition: opacity .6s var(--ease), transform .6s var(--ease), translate .15s, box-shadow .15s
     }
+
+    .slide.visible .d4c[data-goto].d2 { transition-delay: .22s, .22s, 0s, 0s }
+    .slide.visible .d4c[data-goto].d3 { transition-delay: .34s, .34s, 0s, 0s }
+    .slide.visible .d4c[data-goto].d4 { transition-delay: .46s, .46s, 0s, 0s }
+    .slide.visible .d4c[data-goto].d5 { transition-delay: .58s, .58s, 0s, 0s }
 
     .d4c[data-goto]:hover,
     .d4c[data-goto]:focus-visible {
-      transform: translate(-4px, -4px);
+      translate: -4px -4px;
       box-shadow: 8px 8px 0 var(--navy);
       outline: none
     }
