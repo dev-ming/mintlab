@@ -1907,10 +1907,119 @@
         <div class="cap reveal d5">* 11/16 실제 출력을 줄여 옮겼습니다. 일감 번호와 이름은 바꿨습니다.</div>
       </section>
 
+      <!-- ========== 09c AGENT TEAM ========== -->
+      <section class="slide s-cyan" data-title="에이전트 팀 · 모델">
+        <div class="wrap">
+          <span class="pill reveal">06 · 코드 작업</span>
+          <h2 class="h1 reveal d1">코드는 에이전트 셋이 나눠서, 모델도 따로</h2>
+          <div class="pipe">
+            <div class="ag reveal d2">
+              <div class="k">01 · 구현</div>
+              <div class="n">app-task</div>
+              <span class="m">OPUS</span>
+              <div class="d">품질이 재작업 횟수를 정해서 좋은 모델</div>
+            </div>
+            <div class="arw reveal d2">→</div>
+            <div class="par reveal d3">
+              <span class="pl">병렬</span>
+              <div class="ag">
+                <div class="k">02 · 리뷰</div>
+                <div class="n">app-review</div>
+                <span class="m">OPUS</span><span class="m alt">보안 변경만 FABLE</span>
+                <div class="d">버그·엣지케이스·규칙 위반을 must-fix / should-fix로</div>
+              </div>
+              <div class="ag">
+                <div class="k">02 · QA</div>
+                <div class="n">app-qa</div>
+                <span class="m">HAIKU</span>
+                <div class="d">typecheck · lint · test · E2E 돌리고 PASS / FAIL만</div>
+              </div>
+            </div>
+            <div class="arw reveal d4">→</div>
+            <div class="ag me reveal d5">
+              <div class="k">03 · 사람</div>
+              <div class="n">직접 확인</div>
+              <div class="d">diff·리뷰·QA 결과 보고 커밋. 푸시와 완료는 직접</div>
+            </div>
+          </div>
+          <p class="pipe-foot reveal d5">리뷰·QA는 <b>코드 수정 권한 없음</b>. 일감이면 한 줄짜리 수정도 리뷰 + QA를 병렬로 돌립니다.</p>
+        </div>
+      </section>
+
+      <!-- ========== 09d BROWSER QA ========== -->
+      <section class="slide s-pink" data-title="브라우저 QA">
+        <div class="wrap">
+          <span class="pill reveal">06 · 브라우저 QA</span>
+          <h2 class="h1 reveal d1">QA는 <span class="mono">/fanista-qa</span> 한 번으로, 일감대로 하나씩</h2>
+          <p class="lede reveal d2" style="margin-top:18px">진행 순서와 규칙을 명령어로 묶어 두고 Claude 앱 내장 브라우저에서 실행합니다</p>
+        </div>
+        <div class="tl">
+          <div class="rail"></div>
+          <div class="steps">
+            <div class="step on reveal d2"><span class="chip">JIRA</span>
+              <div class="node"></div>
+              <div class="n">일감 읽기</div>
+              <div class="d">버전의 내 일감 조회. 설명·댓글에서 확인 항목 뽑기</div><span class="who">AI</span>
+            </div>
+            <div class="step reveal d3"><span class="chip">준비</span>
+              <div class="node"></div>
+              <div class="n">테스트 데이터</div>
+              <div class="d">테스트 계정 가입, 운영툴에 [QA] 데이터 생성</div><span class="who">같이</span>
+            </div>
+            <div class="step reveal d4"><span class="chip">확인</span>
+              <div class="node"></div>
+              <div class="n">직접 조작</div>
+              <div class="d">클릭·입력·모바일 크기. 판정은 화면 말고 DOM 값으로</div><span class="who">AI</span>
+            </div>
+            <div class="step reveal d5"><span class="chip">보고</span>
+              <div class="node"></div>
+              <div class="n">결과 표</div>
+              <div class="d">항목별 <span class="mk ok">✓</span><span class="mk ng">✕</span><span class="mk wn">!</span><br>못 본 항목은 이유와 따로</div><span class="who">AI</span>
+            </div>
+            <div class="step on reveal d6"><span class="chip">JIRA</span>
+              <div class="node"></div>
+              <div class="n">댓글 · 전환</div>
+              <div class="d">통과는 결과 표 댓글, 미통과는 재현·원인 추정</div><span class="who h">직접 확인</span>
+            </div>
+          </div>
+        </div>
+        <div class="tl-foot reveal d6"><span class="pill">사람 몫</span><span><b>로그인</b>, <b>권한 부여</b>, <b>비밀번호 입력</b>은 AI가
+            하지 않습니다.</span></div>
+      </section>
+
+      <!-- ========== 09e BROWSER QA RESULT ========== -->
+      <section class="slide s-dark" data-title="QA 실제 결과">
+        <div class="stars" data-n="20"></div>
+        <div class="crt"></div>
+        <div class="wrap">
+          <span class="pill p reveal">06 · QA 실제 결과</span>
+          <h2 class="h1 reveal d1">AI가 끝까지 눌러보고 남긴 QA 결과</h2>
+        </div>
+        <div class="demo reveal d2">
+          <div class="bar"><i></i><i></i><i></i><span style="margin-left:12px">Claude 앱 · 왼쪽 대화 / 오른쪽 내장 브라우저</span></div>
+          <img class="shot" src="qa-result.png" alt="Claude 앱에서 내장 브라우저로 이메일 링크 로그인을 QA하고 단계별 결과 표를 남긴 화면" width="1432" height="838">
+        </div>
+        <div class="notes">
+          <div class="nt tile br pk reveal d3">
+            <div class="h">재현</div>
+            <div class="b">페이지를 연 뒤 저장소를 막아서 인앱 브라우저 환경을 흉내냄</div>
+          </div>
+          <div class="nt tile br pk reveal d4">
+            <div class="h">판정</div>
+            <div class="b">스크린샷 대신 DOM 값과 콘솔 오류 수집으로 통과 여부 판단</div>
+          </div>
+          <div class="nt tile br pk reveal d5">
+            <div class="h">못 본 것</div>
+            <div class="b">확인 못 한 항목은 통과로 치지 않고 따로 적어 둠</div>
+          </div>
+        </div>
+        <div class="cap reveal d5">* 11/11 실제 QA 화면입니다. 제품명, 주소, 일감 번호, 계정은 가렸습니다.</div>
+      </section>
+
       <!-- ========== 07 4D OVERVIEW ========== -->
       <section class="slide s-pink" data-title="원칙 네 가지">
         <div class="wrap">
-          <span class="pill reveal">06 · 원칙</span>
+          <span class="pill reveal">07 · 원칙</span>
           <h2 class="h1 reveal d1">만들면서 지킨 원칙 네 가지</h2>
           <div class="four">
             <div class="d4c glass br navy reveal d2">
@@ -2069,115 +2178,6 @@
         </div>
       </section>
 
-      <!-- ========== 09c AGENT TEAM ========== -->
-      <section class="slide s-cyan" data-title="에이전트 팀 · 모델">
-        <div class="wrap">
-          <span class="pill reveal">작업 · 에이전트 팀</span>
-          <h2 class="h1 reveal d1">코드는 에이전트 셋이 나눠서, 모델도 따로</h2>
-          <div class="pipe">
-            <div class="ag reveal d2">
-              <div class="k">01 · 구현</div>
-              <div class="n">app-task</div>
-              <span class="m">OPUS</span>
-              <div class="d">품질이 재작업 횟수를 정해서 좋은 모델</div>
-            </div>
-            <div class="arw reveal d2">→</div>
-            <div class="par reveal d3">
-              <span class="pl">병렬</span>
-              <div class="ag">
-                <div class="k">02 · 리뷰</div>
-                <div class="n">app-review</div>
-                <span class="m">OPUS</span><span class="m alt">보안 변경만 FABLE</span>
-                <div class="d">버그·엣지케이스·규칙 위반을 must-fix / should-fix로</div>
-              </div>
-              <div class="ag">
-                <div class="k">02 · QA</div>
-                <div class="n">app-qa</div>
-                <span class="m">HAIKU</span>
-                <div class="d">typecheck · lint · test · E2E 돌리고 PASS / FAIL만</div>
-              </div>
-            </div>
-            <div class="arw reveal d4">→</div>
-            <div class="ag me reveal d5">
-              <div class="k">03 · 사람</div>
-              <div class="n">직접 확인</div>
-              <div class="d">diff·리뷰·QA 결과 보고 커밋. 푸시와 완료는 직접</div>
-            </div>
-          </div>
-          <p class="pipe-foot reveal d5">리뷰·QA는 <b>코드 수정 권한 없음</b>. 일감이면 한 줄짜리 수정도 리뷰 + QA를 병렬로 돌립니다.</p>
-        </div>
-      </section>
-
-      <!-- ========== 09d BROWSER QA ========== -->
-      <section class="slide s-pink" data-title="브라우저 QA">
-        <div class="wrap">
-          <span class="pill reveal">작업 · 브라우저 QA</span>
-          <h2 class="h1 reveal d1">QA는 <span class="mono">/fanista-qa</span> 한 번으로, 일감대로 하나씩</h2>
-          <p class="lede reveal d2" style="margin-top:18px">진행 순서와 규칙을 명령어로 묶어 두고 Claude 앱 내장 브라우저에서 실행합니다</p>
-        </div>
-        <div class="tl">
-          <div class="rail"></div>
-          <div class="steps">
-            <div class="step on reveal d2"><span class="chip">JIRA</span>
-              <div class="node"></div>
-              <div class="n">일감 읽기</div>
-              <div class="d">버전의 내 일감 조회. 설명·댓글에서 확인 항목 뽑기</div><span class="who">AI</span>
-            </div>
-            <div class="step reveal d3"><span class="chip">준비</span>
-              <div class="node"></div>
-              <div class="n">테스트 데이터</div>
-              <div class="d">테스트 계정 가입, 운영툴에 [QA] 데이터 생성</div><span class="who">같이</span>
-            </div>
-            <div class="step reveal d4"><span class="chip">확인</span>
-              <div class="node"></div>
-              <div class="n">직접 조작</div>
-              <div class="d">클릭·입력·모바일 크기. 판정은 화면 말고 DOM 값으로</div><span class="who">AI</span>
-            </div>
-            <div class="step reveal d5"><span class="chip">보고</span>
-              <div class="node"></div>
-              <div class="n">결과 표</div>
-              <div class="d">항목별 <span class="mk ok">✓</span><span class="mk ng">✕</span><span class="mk wn">!</span><br>못 본 항목은 이유와 따로</div><span class="who">AI</span>
-            </div>
-            <div class="step on reveal d6"><span class="chip">JIRA</span>
-              <div class="node"></div>
-              <div class="n">댓글 · 전환</div>
-              <div class="d">통과는 결과 표 댓글, 미통과는 재현·원인 추정</div><span class="who h">직접 확인</span>
-            </div>
-          </div>
-        </div>
-        <div class="tl-foot reveal d6"><span class="pill">사람 몫</span><span><b>로그인</b>, <b>권한 부여</b>, <b>비밀번호 입력</b>은 AI가
-            하지 않습니다.</span></div>
-      </section>
-
-      <!-- ========== 09e BROWSER QA RESULT ========== -->
-      <section class="slide s-dark" data-title="QA 실제 결과">
-        <div class="stars" data-n="20"></div>
-        <div class="crt"></div>
-        <div class="wrap">
-          <span class="pill p reveal">작업 · 브라우저 QA 실제 결과</span>
-          <h2 class="h1 reveal d1">AI가 끝까지 눌러보고 남긴 QA 결과</h2>
-        </div>
-        <div class="demo reveal d2">
-          <div class="bar"><i></i><i></i><i></i><span style="margin-left:12px">Claude 앱 · 왼쪽 대화 / 오른쪽 내장 브라우저</span></div>
-          <img class="shot" src="qa-result.png" alt="Claude 앱에서 내장 브라우저로 이메일 링크 로그인을 QA하고 단계별 결과 표를 남긴 화면" width="1432" height="838">
-        </div>
-        <div class="notes">
-          <div class="nt tile br pk reveal d3">
-            <div class="h">재현</div>
-            <div class="b">페이지를 연 뒤 저장소를 막아서 인앱 브라우저 환경을 흉내냄</div>
-          </div>
-          <div class="nt tile br pk reveal d4">
-            <div class="h">판정</div>
-            <div class="b">스크린샷 대신 DOM 값과 콘솔 오류 수집으로 통과 여부 판단</div>
-          </div>
-          <div class="nt tile br pk reveal d5">
-            <div class="h">못 본 것</div>
-            <div class="b">확인 못 한 항목은 통과로 치지 않고 따로 적어 둠</div>
-          </div>
-        </div>
-        <div class="cap reveal d5">* 11/11 실제 QA 화면입니다. 제품명, 주소, 일감 번호, 계정은 가렸습니다.</div>
-      </section>
-
       <!-- ========== 10 DISCERNMENT + DILIGENCE ========== -->
       <section class="slide s-dark" data-title="검증 · 책임">
         <div class="stars" data-n="20"></div>
@@ -2223,7 +2223,7 @@
         <div class="stars" data-n="20"></div>
         <div class="crt"></div>
         <div class="wrap">
-          <span class="pill reveal">07 · 효과</span>
+          <span class="pill reveal">08 · 효과</span>
           <h2 class="h1 reveal d1">지금까지 쌓인 기록과 <span class="w">앞으로 잴 것</span></h2>
           <div class="stats">
             <div class="stat tile br reveal d2">
@@ -2274,7 +2274,7 @@
         <div class="crt"></div>
         <div class="land" id="land"></div>
         <div class="wrap">
-          <span class="pill p reveal">08 · 다른 팀에서도</span>
+          <span class="pill p reveal">09 · 다른 팀에서도</span>
           <h2 class="hero reveal d1">다른 직군도<br>그대로 쓸 수 있습니다</h2>
           <div class="roll">
             <div class="ro tile br reveal d2">
