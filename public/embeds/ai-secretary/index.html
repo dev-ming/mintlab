@@ -1033,33 +1033,6 @@
       flex-direction: column
     }
 
-    /* hover uses `translate` (not `transform`) so it can skip the reveal stagger delay */
-    .d4c[data-goto] {
-      cursor: pointer;
-      transition: opacity .6s var(--ease), transform .6s var(--ease), translate .15s, box-shadow .15s
-    }
-
-    .slide.visible .d4c[data-goto].d2 { transition-delay: .22s, .22s, 0s, 0s }
-    .slide.visible .d4c[data-goto].d3 { transition-delay: .34s, .34s, 0s, 0s }
-    .slide.visible .d4c[data-goto].d4 { transition-delay: .46s, .46s, 0s, 0s }
-    .slide.visible .d4c[data-goto].d5 { transition-delay: .58s, .58s, 0s, 0s }
-
-    @media (hover: hover) and (pointer: fine) {
-
-      .d4c[data-goto]:hover,
-      .d4c[data-goto]:focus-visible {
-        translate: -4px -4px;
-        box-shadow: 8px 8px 0 var(--navy);
-        outline: none
-      }
-    }
-
-    @media (hover: none), (pointer: coarse) {
-      .d4c[data-goto] {
-        cursor: default
-      }
-    }
-
     .d4c .big {
       font: 900 120px/1 var(--display);
       color: var(--navy);
@@ -1932,25 +1905,25 @@
           <span class="pill reveal">06 · 원칙</span>
           <h2 class="h1 reveal d1">만들면서 지킨 원칙 네 가지</h2>
           <div class="four">
-            <div class="d4c glass br navy reveal d2" data-goto="나눠 맡기기" role="button" tabindex="0">
+            <div class="d4c glass br navy reveal d2">
               <div class="big">01</div>
               <div class="en">RULE 01</div>
               <div class="ko">나눠 맡기기</div>
               <div class="q">정보 모으기, 대조, 초안은 AI. 결정과 원인 확정은 사람이 직접.</div>
             </div>
-            <div class="d4c glass br navy reveal d3" data-goto="지시문 구성" role="button" tabindex="0">
+            <div class="d4c glass br navy reveal d3">
               <div class="big">02</div>
               <div class="en">RULE 02</div>
               <div class="ko">구체적으로 지시</div>
               <div class="q">지시문을 Product, Process, Behavior 세 칸으로 나누고 멈출 지점을 적어 둠.</div>
             </div>
-            <div class="d4c glass br navy reveal d4" data-goto="검증 · 책임" role="button" tabindex="0">
+            <div class="d4c glass br navy reveal d4">
               <div class="big">03</div>
               <div class="en">RULE 03</div>
               <div class="ko">결과 의심하기</div>
               <div class="q">AI가 확신해도 일단 의심. 출처는 직접 열어보고, 확실하지 않으면 "추정"이라고 쓰게 함.</div>
             </div>
-            <div class="d4c glass br navy reveal d5" data-goto="검증 · 책임" role="button" tabindex="0">
+            <div class="d4c glass br navy reveal d5">
               <div class="big">04</div>
               <div class="en">RULE 04</div>
               <div class="ko">책임은 사람이</div>
@@ -2428,19 +2401,6 @@
       }
     }
     window.deck = new SlidePresentation();
-
-    // cards with data-goto jump to the slide whose data-title matches
-    document.querySelectorAll('[data-goto]').forEach(el => {
-      const jump = () => {
-        if (matchMedia('(hover: none), (pointer: coarse)').matches) return; // no jump on touch/mobile
-        const i = deck.slides.findIndex(s => s.dataset.title === el.dataset.goto);
-        if (i >= 0) deck.go(i);
-      };
-      el.addEventListener('click', jump);
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); jump(); }
-      });
-    });
 
   </script>
 </body>
