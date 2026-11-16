@@ -1731,11 +1731,37 @@
       color: rgba(94, 220, 244, .5)
     }
 
+    @page {
+      size: 1920px 1080px;
+      margin: 0
+    }
+
     @media print {
 
       .dots,
       .count,
       .hint {
+        display: none !important
+      }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact
+      }
+
+      /* every slide is printed, so reveal-animated content must already be shown */
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important
+      }
+
+      .slide {
+        transition: none !important
+      }
+
+      /* noise texture rasterizes into every page and bloats the PDF */
+      .slide::before {
         display: none !important
       }
     }
