@@ -483,9 +483,9 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
 <section class="slide s-lav" data-title="연동">
   <div class="wrap">
     <span class="pill reveal">03 · 연동</span>
-    <h2 class="h1 reveal d1">읽기는 자동, 쓰기는 제가 확인하고 실행</h2>
+    <h2 class="h1 reveal d1">읽기는 자동, 쓰기는 사람이 확인하고 실행</h2>
     <table class="px reveal d2">
-      <tr><th style="width:250px">도구</th><th>AI가 보는 것</th><th>AI가 하는 것</th><th style="width:300px">제가 확인하는 것</th></tr>
+      <tr><th style="width:250px">도구</th><th>AI가 보는 것</th><th>AI가 하는 것</th><th style="width:300px">사람이 확인하는 것</th></tr>
       <tr><td>Jira<br><span class="tag">운영 중</span></td><td>내 일감, 상태, 릴리즈별 남은 일과 마감</td><td>우선순위 정리, 진행중 전환, 작업 댓글 초안</td><td>완료 처리, 댓글 올리기</td></tr>
       <tr><td>Sentry<br><span class="tag">운영 중</span></td><td>최근 24시간 새 오류, 갑자기 늘어난 오류</td><td>기존 티켓과 겹치는지 보고 버그 티켓 초안</td><td>티켓 생성</td></tr>
       <tr><td>Calendar<br><span class="tag new">신규</span></td><td>오늘, 이번 주 회의와 보고 일정, 빈 시간</td><td>작업 시간 블록 제안, 보고 · 릴리즈 리마인드</td><td>일정 추가, 수정</td></tr>
@@ -505,13 +505,13 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
     <div class="rail"></div>
     <div class="steps">
       <div class="step on reveal d2"><span class="chip">출근</span><div class="node"></div><div class="n">출근 브리핑</div><div class="d"><span class="mono">/morning</span> 실행하면 네 군데를 읽고 한 화면으로 정리. 예약 실행이나 SessionStart 훅으로 자동 실행</div><span class="who">AI</span></div>
-      <div class="step reveal d3"><span class="chip">+10분</span><div class="node"></div><div class="n">시간표 확정</div><div class="d">빈 시간에 일감 넣은 안을 보고 괜찮으면 캘린더에 등록</div><span class="who h">제가 확인</span></div>
+      <div class="step reveal d3"><span class="chip">+10분</span><div class="node"></div><div class="n">시간표 확정</div><div class="d">빈 시간에 일감 넣은 안을 보고 괜찮으면 캘린더에 등록</div><span class="who h">사람이 확인</span></div>
       <div class="step reveal d4"><span class="chip">오전·오후</span><div class="node"></div><div class="n">작업</div><div class="d">원래 쓰던 구현 → 리뷰 → QA → 커밋 에이전트 그대로</div><span class="who">같이</span></div>
       <div class="step reveal d5"><span class="chip">점심 후</span><div class="node"></div><div class="n">중간 점검</div><div class="d">새로 생긴 Sentry 오류와 Slack 멘션만 다시 확인</div><span class="who">AI</span></div>
-      <div class="step on reveal d6"><span class="chip">퇴근</span><div class="node"></div><div class="n">퇴근 정리</div><div class="d">한 일, 못 한 일, 내일 할 일 정리. Jira 댓글과 업무일지 초안까지</div><span class="who h">제가 확인</span></div>
+      <div class="step on reveal d6"><span class="chip">퇴근</span><div class="node"></div><div class="n">퇴근 정리</div><div class="d">한 일, 못 한 일, 내일 할 일 정리. Jira 댓글과 업무일지 초안까지</div><span class="who h">사람이 확인</span></div>
     </div>
   </div>
-  <div class="tl-foot reveal d6"><span class="pill">직접 확인</span><span>제가 손대는 건 <b>아침 시간표</b>와 <b>저녁 기록</b>, 하루 두 번입니다.</span></div>
+  <div class="tl-foot reveal d6"><span class="pill">직접 확인</span><span>사람이 손대는 건 <b>아침 시간표</b>와 <b>저녁 기록</b>, 하루 두 번입니다.</span></div>
 </section>
 
 <!-- ========== 06 BRIEFING DEMO ========== -->
@@ -542,7 +542,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
   <div class="notes">
     <div class="nt tile br pk reveal d3"><div class="h">출처</div><div class="b">항목마다 Jira, Sentry, Slack 원문 링크가 붙어 있어서 바로 확인 가능</div></div>
     <div class="nt tile br pk reveal d4"><div class="h">멈춤</div><div class="b">티켓 생성, 일정 등록, 메시지 발송은 <b>[y/n]</b>에서 멈추고 제 답을 기다림</div></div>
-    <div class="nt tile br pk reveal d5"><div class="h">추정 표시</div><div class="b">원인이 확실하지 않으면 "추정"이라고 써둠. 확정은 제가 재현해보고 함</div></div>
+    <div class="nt tile br pk reveal d5"><div class="h">추정 표시</div><div class="b">원인이 확실하지 않으면 "추정"이라고 써둠. 확정은 사람이 직접 재현해보고 함</div></div>
   </div>
   <div class="cap reveal d5">* 예시 화면입니다. 일감 번호와 내용은 실제가 아닙니다.</div>
 </section>
@@ -553,7 +553,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
     <span class="pill reveal">06 · 원칙</span>
     <h2 class="h1 reveal d1">만들면서 지킨 원칙 네 가지</h2>
     <div class="four">
-      <div class="d4c glass br navy reveal d2"><div class="big">01</div><div class="en">RULE 01</div><div class="ko">나눠 맡기기</div><div class="q">정보 모으기, 대조, 초안은 AI. 결정과 원인 확정은 제가.</div><div class="go">→ 위임 기준</div></div>
+      <div class="d4c glass br navy reveal d2"><div class="big">01</div><div class="en">RULE 01</div><div class="ko">나눠 맡기기</div><div class="q">정보 모으기, 대조, 초안은 AI. 결정과 원인 확정은 사람이 직접.</div><div class="go">→ 위임 기준</div></div>
       <div class="d4c glass br navy reveal d3"><div class="big">02</div><div class="en">RULE 02</div><div class="ko">구체적으로 지시</div><div class="q">지시문을 Product, Process, Behavior로 나눠 쓰고 멈출 지점을 적어둠.</div><div class="go">→ 지시문 구성</div></div>
       <div class="d4c glass br navy reveal d4"><div class="big">03</div><div class="en">RULE 03</div><div class="ko">결과 의심하기</div><div class="q">AI가 자신 있게 말해도 그대로 안 믿음. 출처 링크, 추정 표시, 교차 검증.</div><div class="go">→ 실제로 잡은 사례</div></div>
       <div class="d4c glass br navy reveal d5"><div class="big">04</div><div class="en">RULE 04</div><div class="ko">책임은 사람이</div><div class="q">쓰기는 확인 후 실행. 사고 나면 규칙으로 남기고, AI가 쓴 건 표시.</div><div class="go">→ 안전장치</div></div>
@@ -568,7 +568,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
     <span class="pill reveal">원칙 01 · 나눠 맡기기</span>
     <h2 class="h1 reveal d1">AI한테 넘기는 것과 <span class="w">사람이 처리하는 것</span></h2>
     <div class="mx reveal d2">
-      <div class="hd z">일</div><div class="hd a">AI</div><div class="hd b">AI 제안 → 제가 확인</div><div class="hd c">사람이 처리</div>
+      <div class="hd z">일</div><div class="hd a">AI</div><div class="hd b">AI 제안 → 사람이 확인</div><div class="hd c">사람이 처리</div>
       <div>일감, 일정, 메시지 모으기</div><div class="ck"><i class="sq a"></i></div><div class="ck"></div><div class="ck"></div>
       <div>Sentry 오류가 Jira에 있는지 대조</div><div class="ck"><i class="sq a"></i></div><div class="ck"></div><div class="ck"></div>
       <div>버그 티켓 생성</div><div class="ck"></div><div class="ck"><i class="sq b"></i></div><div class="ck"></div>
@@ -577,7 +577,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
       <div>버그 원인 확정, 우선순위 최종 결정</div><div class="ck"></div><div class="ck"></div><div class="ck"><i class="sq c"></i></div>
       <div>푸시, 완료 처리, BE 코드 수정</div><div class="ck"></div><div class="ck"></div><div class="ck"><i class="sq c"></i></div>
     </div>
-    <p class="mx-foot reveal d3">기준은 간단합니다. <b>되돌리기 어렵거나 다른 사람한테 가는 작업</b>은 제가 확인하고 실행합니다.</p>
+    <p class="mx-foot reveal d3">기준은 간단합니다. <b>되돌리기 어렵거나 다른 사람한테 가는 작업</b>은 사람이 직접 확인하고 실행합니다.</p>
   </div>
 </section>
 
@@ -605,7 +605,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
   <div class="stars" data-n="20"></div><div class="crt"></div>
   <div class="wrap">
     <span class="pill c reveal">원칙 03 · 04</span>
-    <h2 class="h1 reveal d1">AI 말을 그대로 안 믿고, <span class="w">마지막 확인은 제가</span></h2>
+    <h2 class="h1 reveal d1">AI 말을 그대로 안 믿고, <span class="w">마지막 확인은 사람이 직접</span></h2>
     <div class="split">
       <div class="panel tile br c reveal d2"><div class="k">원칙 03</div><div class="n">결과 의심하기</div>
         <div class="s">AI 결과를 의심해보고 실제로 잡아낸 것들</div>
@@ -615,9 +615,9 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
           <div class="it"><span class="t">교차 검증</span><span class="b">구현 에이전트 결과를 리뷰·QA 에이전트가 따로 검증. 리뷰·QA는 수정 권한 없음</span></div>
         </div></div>
       <div class="panel tile br pk p reveal d3"><div class="k">원칙 04</div><div class="n">책임은 사람이</div>
-        <div class="s">결과 책임은 제가 지는 구조</div>
+        <div class="s">결과 책임은 사람이 지는 구조</div>
         <div class="items">
-          <div class="it"><span class="t">확인 후 실행</span><span class="b">쓰기 작업은 전부 제가 확인. 푸시와 완료 처리는 제가 직접</span></div>
+          <div class="it"><span class="t">확인 후 실행</span><span class="b">쓰기 작업은 전부 사람이 확인. 푸시와 완료 처리도 사람이 직접</span></div>
           <div class="it"><span class="t">규칙 누적</span><span class="b">사고가 한 번 나면 규칙으로 저장해서 다음부터 자동 적용. 메모리 파일 106개</span></div>
           <div class="it"><span class="t">공개</span><span class="b">커밋엔 Co-Authored-By, Jira 댓글엔 AI 작성 표시</span></div>
           <div class="it"><span class="t">데이터</span><span class="b">연동 범위는 내 멘션, DM, 내 캘린더까지만. 사내 정책도 확인</span></div>
@@ -659,7 +659,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
       <div class="ro tile br reveal d2"><div class="k">직군별 변형</div><div class="n">연결 도구만 바꾸면 됨</div><div class="d">기획: Jira+Slack+캘린더<br>QA: Jira+Sentry<br>디자인: Figma+Slack</div></div>
       <div class="ro tile br reveal d3"><div class="k">템플릿 공개</div><div class="n">/morning 묶어서 공유</div><div class="d">스킬, 위임 기준표, 지시문 양식을 플러그인으로</div></div>
       <div class="ro tile br reveal d4"><div class="k">안전 기본값</div><div class="n">확인 절차 기본 포함</div><div class="d">쓰기 전 확인, 최소 연동 범위가 처음부터 들어가 있음</div></div>
-      <div class="ro tile br reveal d5"><div class="k">온보딩</div><div class="n">30분이면 첫 브리핑</div><div class="d">제가 써둔 AI 활용 가이드 7편 보고 따라하기</div></div>
+      <div class="ro tile br reveal d5"><div class="k">온보딩</div><div class="n">30분이면 첫 브리핑</div><div class="d">블로그에 정리해둔 AI 활용 가이드 7편 보고 따라하기</div></div>
     </div>
   </div>
   <div class="who reveal d6"><span>#AI로_일하는_방식을_바꾸다</span><span>프론트엔드 개발 · 민지 · 2026.11</span></div>
