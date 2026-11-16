@@ -1030,54 +1030,6 @@
       margin-top: 20px
     }
 
-    /* real-case box at the bottom of each rule card */
-    .d4c .case {
-      margin-top: auto;
-      padding-top: 24px
-    }
-
-    .d4c .case .tg {
-      display: inline-block;
-      background: var(--navy);
-      color: var(--yellow);
-      font: 700 14px/1 var(--mono);
-      letter-spacing: .14em;
-      padding: 7px 12px
-    }
-
-    .d4c .case .bx {
-      background: rgba(255, 255, 255, .5);
-      border: 3px solid var(--navy);
-      box-shadow: 5px 5px 0 var(--navy);
-      padding: 14px 16px;
-      font: 500 20px/1.5 var(--body);
-      color: var(--navy)
-    }
-
-    .d4c .case .bx.mono {
-      font: 500 18px/1.55 var(--mono)
-    }
-
-    .d4c .case mark {
-      background: linear-gradient(transparent 58%, var(--yellow) 58%);
-      color: var(--navy);
-      font-weight: 700
-    }
-
-    .d4c .case .ln+.ln {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 2px dashed rgba(15, 27, 61, .3)
-    }
-
-    .d4c .case .ln b {
-      display: block;
-      font: 700 13px/1.2 var(--mono);
-      letter-spacing: .16em;
-      color: var(--navy);
-      opacity: .6
-    }
-
     .d4c .go {
       margin-top: auto;
       font: 700 17px var(--mono);
@@ -1975,41 +1927,24 @@
               <div class="en">RULE 01</div>
               <div class="ko">나눠 맡기기</div>
               <div class="q">정보 모으기, 대조, 초안은 AI. 결정과 원인 확정은 사람이 직접.</div>
-              <div class="case"><span class="tg">실제 사례 · 11/16</span>
-                <div class="bx">주말 신규 오류 6건<br>AI는 Jira 대조, 티켓 초안까지<br><mark>등록은 사람이 [y/n]</mark></div>
-              </div>
             </div>
             <div class="d4c glass br navy reveal d3">
               <div class="big">02</div>
               <div class="en">RULE 02</div>
               <div class="ko">구체적으로 지시</div>
-              <div class="q">지시문을 세 칸으로 나눠 씀.</div>
-              <div class="case"><span class="tg">실제 지시문</span>
-                <div class="bx">
-                  <div class="ln"><b>PRODUCT · 뭘 만들지</b>할 일은 3개까지</div>
-                  <div class="ln"><b>PROCESS · 순서</b>Jira → Sentry → Slack</div>
-                  <div class="ln"><b>BEHAVIOR · 멈출 곳</b><mark>티켓 만들기 전 [y/n]</mark></div>
-                </div>
-              </div>
+              <div class="q">지시문을 Product, Process, Behavior 세 칸으로 나누고 멈출 지점을 적어 둠.</div>
             </div>
             <div class="d4c glass br navy reveal d4">
               <div class="big">03</div>
               <div class="en">RULE 03</div>
               <div class="ko">결과 의심하기</div>
               <div class="q">AI가 확신해도 일단 의심. 출처는 직접 열어보고, 확실하지 않으면 "추정"이라고 쓰게 함.</div>
-              <div class="case"><span class="tg">실제 사례</span>
-                <div class="bx">시안: 환불 유예 7일<br>BE 상수: 10일<br><mark>교차 확인으로 잡음</mark></div>
-              </div>
             </div>
             <div class="d4c glass br navy reveal d5">
               <div class="big">04</div>
               <div class="en">RULE 04</div>
               <div class="ko">책임은 사람이</div>
               <div class="q">쓰기는 확인 후 실행. 사고 나면 규칙으로 남기고, AI가 쓴 건 표시.</div>
-              <div class="case"><span class="tg">실제 커밋 끝줄</span>
-                <div class="bx mono">Refs: APP-104<br><mark>Co-Authored-By:</mark><br><mark>Claude Fable 5.2</mark>
-                </div>
-              </div>
             </div>
           </div>
         </div>
