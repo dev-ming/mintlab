@@ -885,6 +885,32 @@
       margin-top: 12px
     }
 
+    /* pixel result marks (instead of color emoji, which blur and inherit text alpha) */
+    .mk {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      font: 700 20px/26px var(--mono);
+      text-align: center;
+      color: var(--navy);
+      border: 2px solid var(--navy);
+      box-shadow: 3px 3px 0 var(--navy);
+      vertical-align: 2px;
+      margin-right: 10px
+    }
+
+    .mk.ok {
+      background: var(--cyan)
+    }
+
+    .mk.ng {
+      background: var(--white)
+    }
+
+    .mk.wn {
+      background: var(--yellow)
+    }
+
     .step .who {
       display: inline-block;
       margin-top: 22px;
@@ -2129,7 +2155,7 @@
             <div class="step reveal d5"><span class="chip">보고</span>
               <div class="node"></div>
               <div class="n">결과 표</div>
-              <div class="d">항목별 ✅ ❌ ⚠️. 못 본 항목은 이유와 따로</div><span class="who">AI</span>
+              <div class="d">항목별 <span class="mk ok">✓</span><span class="mk ng">✕</span><span class="mk wn">!</span><br>못 본 항목은 이유와 따로</div><span class="who">AI</span>
             </div>
             <div class="step on reveal d6"><span class="chip">JIRA</span>
               <div class="node"></div>
