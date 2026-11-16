@@ -1018,11 +1018,20 @@
     .slide.visible .d4c[data-goto].d4 { transition-delay: .46s, .46s, 0s, 0s }
     .slide.visible .d4c[data-goto].d5 { transition-delay: .58s, .58s, 0s, 0s }
 
-    .d4c[data-goto]:hover,
-    .d4c[data-goto]:focus-visible {
-      translate: -4px -4px;
-      box-shadow: 8px 8px 0 var(--navy);
-      outline: none
+    @media (hover: hover) and (pointer: fine) {
+
+      .d4c[data-goto]:hover,
+      .d4c[data-goto]:focus-visible {
+        translate: -4px -4px;
+        box-shadow: 8px 8px 0 var(--navy);
+        outline: none
+      }
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      .d4c[data-goto] {
+        cursor: default
+      }
     }
 
     .d4c .big {
@@ -2444,6 +2453,7 @@
     document.querySelectorAll('[data-goto]').forEach(el => {
       const jump = () => {
         if (document.body.classList.contains('editing')) return;
+        if (matchMedia('(hover: none), (pointer: coarse)').matches) return; // no jump on touch/mobile
         const i = deck.slides.findIndex(s => s.dataset.title === el.dataset.goto);
         if (i >= 0) deck.go(i);
       };
