@@ -1494,6 +1494,61 @@
       border-top: 4px solid var(--cyan)
     }
 
+    /* SLIDE 11b — time saved → big features */
+    .gain {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 48px;
+      margin-top: 56px;
+      align-items: start
+    }
+
+    .gain-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 28px
+    }
+
+    .feat {
+      display: flex;
+      flex-direction: column;
+      border-top: 4px solid var(--cyan)
+    }
+
+    .fr {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 24px;
+      align-items: start;
+      padding: 26px 0;
+      border-bottom: 2px solid rgba(94, 220, 244, .16)
+    }
+
+    .fr .ver {
+      font: 700 18px var(--mono);
+      letter-spacing: .06em;
+      background: var(--navy);
+      color: var(--yellow);
+      border: 2px solid var(--yellow);
+      padding: 8px 10px;
+      text-align: center
+    }
+
+    .fr .fn {
+      font: 700 36px/1.2 var(--display);
+      color: var(--white)
+    }
+
+    .fr .fd {
+      font: 500 24px/1.5 var(--body);
+      color: var(--body-dark);
+      margin-top: 8px
+    }
+
+    .gain-foot {
+      color: var(--body-dark)
+    }
+
     .meas .k {
       font: 700 20px var(--mono);
       color: var(--cyan);
@@ -2271,6 +2326,43 @@
             <div class="m">일감 보며 손으로 클릭</div>
             <div><span class="mono">/fanista-qa</span>로 일감대로, 결과 표 댓글</div>
           </div>
+        </div>
+      </section>
+
+      <!-- ========== 11b TIME → BIG FEATURES ========== -->
+      <section class="slide s-dark" data-title="아낀 시간">
+        <div class="stars" data-n="20"></div>
+        <div class="crt"></div>
+        <div class="wrap">
+          <span class="pill reveal">08 · 효과</span>
+          <h2 class="h1 reveal d1">정리는 AI가, <span class="w">시간은 큰 기능에</span></h2>
+          <div class="gain">
+            <div class="gain-stats">
+              <div class="stat tile br reveal d2">
+                <div class="v" data-count="101">101</div>
+                <div class="l">월평균 처리 일감<br>(6~10월, FE 혼자)</div>
+              </div>
+              <div class="stat tile br reveal d3">
+                <div class="v"><span data-count="37">37</span></div>
+                <div class="l">주 평균 커밋<br>(도입 전 10)</div>
+              </div>
+            </div>
+            <div class="feat reveal d3">
+              <div class="fr">
+                <span class="ver">v1.3.2</span>
+                <div><div class="fn">공식 투표</div><div class="fd">BE 계약과 FE 차이 11영역을 AI가 먼저 대조해 작업 단위로 쪼갬</div></div>
+              </div>
+              <div class="fr">
+                <span class="ver">v1.3.3</span>
+                <div><div class="fn">하트 + star 캠페인</div><div class="fd">5단계로 나눠 단계마다 리뷰·QA. 목록·상세·참여 화면까지 구현 완료</div></div>
+              </div>
+              <div class="fr">
+                <span class="ver">v1.3.3</span>
+                <div><div class="fn">홈 개편 (4~5일 규모)</div><div class="fd">릴리즈 도중 추가됐지만 주간 목표를 다시 짜서 이번 주 일정에 배치</div></div>
+              </div>
+            </div>
+          </div>
+          <p class="pipe-foot gain-foot reveal d4">일감 정리·오류 대조·기록에 쓰던 시간을 <b>구현에 돌려서</b>, 큰 기능도 릴리즈 일정 안에 넣었습니다.</p>
         </div>
       </section>
 
