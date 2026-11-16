@@ -1246,6 +1246,160 @@
     /* ===========================================
    SLIDE 10 — DISCERNMENT + DILIGENCE (dark split)
    =========================================== */
+    /* SLIDE 09b — guardrails (3 panels) */
+    .guard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      margin-top: 60px
+    }
+
+    .guard .panel {
+      min-height: 600px
+    }
+
+    .gl {
+      list-style: none;
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .gl li {
+      font: 500 26px/1.45 var(--body);
+      color: var(--white);
+      padding-left: 30px;
+      position: relative
+    }
+
+    .gl li::before {
+      content: '■';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      font-size: 16px;
+      color: var(--yellow)
+    }
+
+    .gl code {
+      font: 600 24px var(--mono);
+      color: var(--yellow)
+    }
+
+    /* SLIDE 09c — agent pipeline */
+    .pipe {
+      display: grid;
+      grid-template-columns: 1fr 64px 1.25fr 64px 1fr;
+      align-items: center;
+      margin-top: 64px
+    }
+
+    .ag {
+      background: var(--white);
+      padding: 30px 30px 32px;
+      box-shadow: 6px 6px 0 var(--navy);
+      border: 3px solid var(--navy)
+    }
+
+    .ag .k {
+      font: 700 18px var(--mono);
+      letter-spacing: .14em;
+      color: var(--pink)
+    }
+
+    .ag .n {
+      font: 700 46px/1.15 var(--display);
+      margin: 8px 0 14px
+    }
+
+    .ag .m {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--yellow);
+      font: 700 17px/1 var(--mono);
+      letter-spacing: .12em;
+      padding: 8px 12px;
+      margin-right: 8px
+    }
+
+    .ag .m.alt {
+      background: transparent;
+      color: var(--navy);
+      border: 2px solid var(--navy);
+      padding: 6px 10px
+    }
+
+    .ag .d {
+      font: 500 24px/1.5 var(--body);
+      color: var(--body-light);
+      margin-top: 16px
+    }
+
+    .ag.me {
+      background: var(--navy);
+      box-shadow: 6px 6px 0 var(--yellow)
+    }
+
+    .ag.me .k {
+      color: var(--yellow)
+    }
+
+    .ag.me .n {
+      color: var(--cyan)
+    }
+
+    .ag.me .d {
+      color: var(--body-dark)
+    }
+
+    .arw {
+      font: 900 54px/1 var(--display);
+      color: var(--navy);
+      text-align: center
+    }
+
+    .par {
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+      position: relative;
+      padding: 30px 22px 22px;
+      border: 3px dashed var(--navy)
+    }
+
+    .par .pl {
+      position: absolute;
+      top: -18px;
+      left: 18px;
+      background: var(--navy);
+      color: var(--yellow);
+      font: 700 16px/1 var(--mono);
+      letter-spacing: .14em;
+      padding: 9px 12px
+    }
+
+    .par .ag .n {
+      font-size: 38px;
+      margin-bottom: 10px
+    }
+
+    .par .ag {
+      padding: 22px 26px
+    }
+
+    .pipe-foot {
+      margin-top: 44px;
+      font: 500 27px/1.5 var(--body);
+      color: var(--body-light)
+    }
+
+    .pipe-foot b {
+      background: var(--navy);
+      color: var(--yellow);
+      padding: 2px 10px
+    }
+
     .split {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1924,6 +2078,127 @@
         </div>
       </section>
 
+      <!-- ========== 09b GUARDRAILS (rules · deny · hooks) ========== -->
+      <section class="slide s-dark" data-title="규칙">
+        <div class="stars" data-n="20"></div>
+        <div class="crt"></div>
+        <div class="wrap">
+          <span class="pill c reveal">원칙 02 · 멈출 지점</span>
+          <h2 class="h1 reveal d1">지시문 말고도 <span class="w">규칙으로 멈추게</span> 했습니다</h2>
+          <div class="guard">
+            <div class="panel tile br c reveal d2">
+              <div class="k">MEMORY · 48</div>
+              <div class="n">기억해 둔 규칙</div>
+              <div class="s">지적받으면 이유와 같이 저장. 다음 세션부터 자동 적용</div>
+              <ul class="gl">
+                <li>Jira 일감 만들기 전에 먼저 검색</li>
+                <li>완료 처리는 사람이</li>
+                <li>댓글은 초안 보여주고 승인 후 게시</li>
+                <li>승인 풀라는 말은 본인 확인 후에만</li>
+              </ul>
+            </div>
+            <div class="panel tile br reveal d3">
+              <div class="k" style="color:var(--yellow)">PERMISSION · 23</div>
+              <div class="n" style="color:var(--yellow)">아예 막아 둔 명령</div>
+              <div class="s">물어보지도 않고 거절되는 목록</div>
+              <ul class="gl">
+                <li><code>git push</code></li>
+                <li><code>rm -rf</code>, <code>sudo</code></li>
+                <li><code>.env</code>, 키 파일 읽기·쓰기</li>
+              </ul>
+            </div>
+            <div class="panel tile br p reveal d4">
+              <div class="k">HOOK</div>
+              <div class="n">실행 직전에 차단</div>
+              <div class="s">리뷰 에이전트가 파일을 지운 사고 뒤에 추가</div>
+              <ul class="gl">
+                <li>rm · rmdir · unlink 차단</li>
+                <li>권한 확인을 건너뛰는 모드여도 동작</li>
+                <li>서브에이전트에도 똑같이 적용</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 09c AGENT TEAM ========== -->
+      <section class="slide s-cyan" data-title="에이전트">
+        <div class="wrap">
+          <span class="pill reveal">작업 · 에이전트 팀</span>
+          <h2 class="h1 reveal d1">코드는 에이전트 셋이 나눠서, 모델도 따로</h2>
+          <div class="pipe">
+            <div class="ag reveal d2">
+              <div class="k">01 · 구현</div>
+              <div class="n">app-task</div>
+              <span class="m">OPUS</span>
+              <div class="d">품질이 재작업 횟수를 정해서 좋은 모델</div>
+            </div>
+            <div class="arw reveal d2">→</div>
+            <div class="par reveal d3">
+              <span class="pl">병렬</span>
+              <div class="ag">
+                <div class="k">02 · 리뷰</div>
+                <div class="n">app-review</div>
+                <span class="m">OPUS</span><span class="m alt">보안 변경만 FABLE</span>
+                <div class="d">버그·엣지케이스·규칙 위반을 must-fix / should-fix로</div>
+              </div>
+              <div class="ag">
+                <div class="k">02 · QA</div>
+                <div class="n">app-qa</div>
+                <span class="m">HAIKU</span>
+                <div class="d">typecheck · lint · test · E2E 돌리고 PASS / FAIL만</div>
+              </div>
+            </div>
+            <div class="arw reveal d4">→</div>
+            <div class="ag me reveal d5">
+              <div class="k">03 · 사람</div>
+              <div class="n">직접 확인</div>
+              <div class="d">diff·리뷰·QA 결과 보고 커밋. 푸시와 완료는 직접</div>
+            </div>
+          </div>
+          <p class="pipe-foot reveal d5">리뷰·QA는 <b>코드 수정 권한 없음</b>. 일감이면 한 줄짜리 수정도 리뷰 + QA를 병렬로 돌립니다.</p>
+        </div>
+      </section>
+
+      <!-- ========== 09d BROWSER QA ========== -->
+      <section class="slide s-pink" data-title="브라우저 QA">
+        <div class="wrap">
+          <span class="pill reveal">작업 · 브라우저 QA</span>
+          <h2 class="h1 reveal d1">QA도 Claude 앱 브라우저에서 일감대로 하나씩</h2>
+        </div>
+        <div class="tl">
+          <div class="rail"></div>
+          <div class="steps">
+            <div class="step on reveal d2"><span class="chip">JIRA</span>
+              <div class="node"></div>
+              <div class="n">일감 읽기</div>
+              <div class="d">버전의 내 일감 조회. 설명·댓글에서 확인 항목 뽑기</div><span class="who">AI</span>
+            </div>
+            <div class="step reveal d3"><span class="chip">준비</span>
+              <div class="node"></div>
+              <div class="n">테스트 데이터</div>
+              <div class="d">테스트 계정 가입, 운영툴에 [QA] 데이터 생성</div><span class="who">같이</span>
+            </div>
+            <div class="step reveal d4"><span class="chip">확인</span>
+              <div class="node"></div>
+              <div class="n">직접 조작</div>
+              <div class="d">클릭·입력·모바일 크기. 판정은 화면 말고 DOM 값으로</div><span class="who">AI</span>
+            </div>
+            <div class="step reveal d5"><span class="chip">보고</span>
+              <div class="node"></div>
+              <div class="n">결과 표</div>
+              <div class="d">항목별 ✅ ❌ ⚠️. 못 본 항목은 이유와 따로</div><span class="who">AI</span>
+            </div>
+            <div class="step on reveal d6"><span class="chip">JIRA</span>
+              <div class="node"></div>
+              <div class="n">댓글 · 전환</div>
+              <div class="d">통과는 결과 표 댓글, 미통과는 재현·원인 추정</div><span class="who h">직접 확인</span>
+            </div>
+          </div>
+        </div>
+        <div class="tl-foot reveal d6"><span class="pill">사람 몫</span><span><b>로그인</b>, <b>권한 부여</b>, <b>비밀번호 입력</b>은 AI가 하지 않습니다.</span></div>
+      </section>
+
       <!-- ========== 10 DISCERNMENT + DILIGENCE ========== -->
       <section class="slide s-dark" data-title="검증 · 책임">
         <div class="stars" data-n="20"></div>
@@ -2045,7 +2320,7 @@
             </div>
           </div>
         </div>
-        <div class="who reveal d6"><span>#AI로_일하는_방식을_바꾸다</span><span>웹팀 · 프론트엔드 개발 · 김민지 · 2026.11</span></div>
+        <div class="who reveal d6"><span>웹팀 · 프론트엔드 개발 · 김민지</span><span>2026.11</span></div>
       </section>
 
     </main>
