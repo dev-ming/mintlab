@@ -428,7 +428,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
     <p class="lede reveal d2">Claude Code에 Jira, Sentry, 구글 캘린더, Slack을 연결해서 쓰고 있는 방법</p>
     <div class="badges reveal d3"><span class="badge">MCP 4개 연동</span><span class="badge">CLAUDE CODE</span><span class="badge">쓰기는 확인 후 실행</span></div>
   </div>
-  <div class="who reveal d4"><span>프론트엔드 개발 · 민지</span><span>2026.11</span></div>
+  <div class="who reveal d4"><span>웹팀 · 프론트엔드 개발 · 김민지</span><span>2026.11</span></div>
 </section>
 
 <!-- ========== 02 BEFORE ========== -->
@@ -504,7 +504,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
   <div class="tl">
     <div class="rail"></div>
     <div class="steps">
-      <div class="step on reveal d2"><span class="chip">출근</span><div class="node"></div><div class="n">출근 브리핑</div><div class="d"><span class="mono">/morning</span> 실행하면 네 군데를 읽고 한 화면으로 정리. 예약 실행이나 SessionStart 훅으로 자동 실행</div><span class="who">AI</span></div>
+      <div class="step on reveal d2"><span class="chip">출근</span><div class="node"></div><div class="n">출근 브리핑</div><div class="d">출근해서 <span class="mono">/morning</span> 실행. 네 군데를 읽고 한 화면으로 정리</div><span class="who">AI</span></div>
       <div class="step reveal d3"><span class="chip">+10분</span><div class="node"></div><div class="n">시간표 확정</div><div class="d">빈 시간에 일감 넣은 안을 보고 괜찮으면 캘린더에 등록</div><span class="who h">사람이 확인</span></div>
       <div class="step reveal d4"><span class="chip">오전·오후</span><div class="node"></div><div class="n">작업</div><div class="d">원래 쓰던 구현 → 리뷰 → QA → 커밋 에이전트 그대로</div><span class="who">같이</span></div>
       <div class="step reveal d5"><span class="chip">점심 후</span><div class="node"></div><div class="n">중간 점검</div><div class="d">새로 생긴 Sentry 오류와 Slack 멘션만 다시 확인</div><span class="who">AI</span></div>
@@ -523,28 +523,29 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
   </div>
   <div class="demo reveal d2">
     <div class="bar"><i></i><i></i><i></i><span style="margin-left:12px">~/morning — claude</span></div>
-<div class="term"><span class="k">☀ 11/13(금) 출근 브리핑</span>
+<div class="term"><span class="k">☀ 11/16(월) 출근 브리핑</span>
 
-<span class="c">[오늘 꼭]</span> 릴리즈 v2.4 코드프리즈 D-2 — 잔여 3건
-  1. FE-101 결제 화면 다국어 누락 <span class="g">(진행중)</span>
-  2. FE-102 <span class="p">[Sentry 신규]</span> 상세 페이지 TypeError, 24h 132건
-     → 티켓 초안 있음, 등록할까요? <span class="k">[y/n]</span>
-  3. FE-103 배너 디자인 QA 반영
+<span class="c">[이번 주]</span> v1.3.3 릴리즈 11/26(목) D-10 · 내 잔여 6건
 
-<span class="c">[일정]</span>   10:00 스탠드업 · 14:00 기획 리뷰 · 17:00 주간 보고
-<span class="c">[시간표]</span> 10:30 FE-101 · 13:00 FE-102 · 15:00 FE-103
+<span class="c">[오늘 꼭]</span>
+  1. APP-104 확인 모달 마무리 <span class="g">(진행 중)</span>
+     푸시(직접) → 번역 키 채움 → 구현 댓글
+  2. APP-121 홈 개편 조사 + BE와 API 협의
+  3. <span class="p">[Sentry 신규]</span> RangeError 6건, Jira에 없음
+     → 티켓 초안 작성, 등록은 확인 후 <span class="k">[y/n]</span>
 
-<span class="c">[Slack]</span>  답해야 함 2 · 읽기만 5 (요약 보기)
+<span class="c">[Slack]</span>  답해야 함 0 · 읽기만 3 · 일감화 1
+<span class="c">[일정]</span>   <span class="p">⚠ 캘린더 연결 안 됨 — 비워 둠</span>
 
-<span class="k">⚠ 확인 필요</span> FE-102는 어제 배포와 시점이 겹침.
-  <span class="g">원인 추정이니 재현 후 확정하세요.</span></div>
+<span class="k">⚠ 확인 필요</span> RangeError 원인은 추정 단계.
+  <span class="g">소스맵이 안 붙어 위치 미확정.</span></div>
   </div>
   <div class="notes">
     <div class="nt tile br pk reveal d3"><div class="h">출처</div><div class="b">항목마다 Jira, Sentry, Slack 원문 링크가 붙어 있어서 바로 확인 가능</div></div>
-    <div class="nt tile br pk reveal d4"><div class="h">멈춤</div><div class="b">티켓 생성, 일정 등록, 메시지 발송은 <b>[y/n]</b>에서 멈추고 제 답을 기다림</div></div>
+    <div class="nt tile br pk reveal d4"><div class="h">멈춤</div><div class="b">티켓 생성, 일정 등록, 메시지 발송은 <b>[y/n]</b>에서 멈추고 사람의 답을 기다림</div></div>
     <div class="nt tile br pk reveal d5"><div class="h">추정 표시</div><div class="b">원인이 확실하지 않으면 "추정"이라고 써둠. 확정은 사람이 직접 재현해보고 함</div></div>
   </div>
-  <div class="cap reveal d5">* 예시 화면입니다. 일감 번호와 내용은 실제가 아닙니다.</div>
+  <div class="cap reveal d5">* 11/16 실제 출력을 줄여 옮겼습니다. 일감 번호와 이름은 바꿨습니다.</div>
 </section>
 
 <!-- ========== 07 4D OVERVIEW ========== -->
@@ -611,16 +612,16 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
         <div class="s">AI 결과를 의심해보고 실제로 잡아낸 것들</div>
         <div class="items">
           <div class="it"><span class="t">정책 수치</span><span class="b">화면에 나가는 유예 기간이 7일로 돼 있었는데, BE 상수와 맞춰보니 10일이 맞았음</span></div>
-          <div class="it"><span class="t">원인 확정</span><span class="b">운영 DOM 오류 원인이 브라우저 번역기인 걸 확인하고 일감 4개로 나눔</span></div>
-          <div class="it"><span class="t">교차 검증</span><span class="b">구현 에이전트 결과를 리뷰·QA 에이전트가 따로 검증. 리뷰·QA는 수정 권한 없음</span></div>
+          <div class="it"><span class="t">원인 단정</span><span class="b">AI가 "서버에 설정 파일이 없어서"라고 단정했는데 실제로는 있었음. 그 뒤로 확정 전엔 "추정" 표시</span></div>
+          <div class="it"><span class="t">교차 검증</span><span class="b">리뷰·QA 에이전트가 둘 다 놓친 lint 위반을 로컬에서 잡음. QA 단계에 전체 lint 추가</span></div>
         </div></div>
       <div class="panel tile br pk p reveal d3"><div class="k">원칙 04</div><div class="n">책임은 사람이</div>
         <div class="s">결과 책임은 사람이 지는 구조</div>
         <div class="items">
-          <div class="it"><span class="t">확인 후 실행</span><span class="b">쓰기 작업은 전부 사람이 확인. 푸시와 완료 처리도 사람이 직접</span></div>
-          <div class="it"><span class="t">규칙 누적</span><span class="b">사고가 한 번 나면 규칙으로 저장해서 다음부터 자동 적용. 메모리 파일 106개</span></div>
+          <div class="it"><span class="t">확인 후 실행</span><span class="b">쓰기는 전부 사람이 확인. 승인을 풀어 달라는 메시지도 본인 확인 전엔 따르지 않음</span></div>
+          <div class="it"><span class="t">사고 → 장치</span><span class="b">리뷰 에이전트가 파일을 지운 뒤, 삭제 명령을 막는 훅 추가</span></div>
+          <div class="it"><span class="t">사고 → 규칙</span><span class="b">타임아웃 재시도로 티켓이 중복 생성된 뒤 "만들기 전에 검색". 이런 규칙이 106개</span></div>
           <div class="it"><span class="t">공개</span><span class="b">커밋엔 Co-Authored-By, Jira 댓글엔 AI 작성 표시</span></div>
-          <div class="it"><span class="t">데이터</span><span class="b">연동 범위는 내 멘션, DM, 내 캘린더까지만. 사내 정책도 확인</span></div>
         </div></div>
     </div>
   </div>
@@ -633,8 +634,8 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
     <span class="pill reveal">07 · 효과</span>
     <h2 class="h1 reveal d1">지금까지 쌓인 기록과 <span class="w">앞으로 잴 것</span></h2>
     <div class="stats">
-      <div class="stat tile br reveal d2"><div class="v" data-count="800">800</div><div class="l">CLAUDE 공동 작성 커밋<br>(2026-05-15~)</div></div>
-      <div class="stat tile br reveal d2"><div class="v" data-count="448">448</div><div class="l">커밋에 연결된<br>JIRA 일감</div></div>
+      <div class="stat tile br reveal d2"><div class="v" data-count="847">847</div><div class="l">CLAUDE 공동 작성 커밋<br>(2026-05-15~)</div></div>
+      <div class="stat tile br reveal d2"><div class="v" data-count="506">506</div><div class="l">커밋에 연결된<br>JIRA 일감</div></div>
       <div class="stat tile br reveal d3"><div class="v" data-count="106">106</div><div class="l">누적된<br>메모리 파일</div></div>
       <div class="stat tile br reveal d3"><div class="v" data-count="151">151</div><div class="l">E2E 테스트<br>항목</div></div>
     </div>
@@ -662,7 +663,7 @@ body.editing [contenteditable="true"]{outline:2px dashed rgba(244,208,63,.6);out
       <div class="ro tile br reveal d5"><div class="k">온보딩</div><div class="n">30분이면 첫 브리핑</div><div class="d">블로그에 정리해둔 AI 활용 가이드 7편 보고 따라하기</div></div>
     </div>
   </div>
-  <div class="who reveal d6"><span>#AI로_일하는_방식을_바꾸다</span><span>프론트엔드 개발 · 민지 · 2026.11</span></div>
+  <div class="who reveal d6"><span>#AI로_일하는_방식을_바꾸다</span><span>웹팀 · 프론트엔드 개발 · 김민지 · 2026.11</span></div>
 </section>
 
 </main>
