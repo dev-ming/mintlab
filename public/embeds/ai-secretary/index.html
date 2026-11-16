@@ -1663,54 +1663,11 @@
       color: rgba(94, 220, 244, .5)
     }
 
-    /* ===========================================
-   INLINE EDITING (press E or hover top-left)
-   =========================================== */
-    .edit-hotzone {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 80px;
-      height: 80px;
-      z-index: 10000;
-      cursor: pointer
-    }
-
-    .edit-toggle {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 10001;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .3s;
-      font: 700 12px var(--mono);
-      letter-spacing: .12em;
-      background: var(--yellow);
-      color: var(--navy);
-      border: 0;
-      padding: 10px 14px;
-      cursor: pointer
-    }
-
-    .edit-toggle.show,
-    .edit-toggle.active {
-      opacity: 1;
-      pointer-events: auto
-    }
-
-    body.editing [contenteditable="true"] {
-      outline: 2px dashed rgba(244, 208, 63, .6);
-      outline-offset: 4px
-    }
-
     @media print {
 
       .dots,
       .count,
-      .hint,
-      .edit-hotzone,
-      .edit-toggle {
+      .hint {
         display: none !important
       }
     }
@@ -2360,8 +2317,6 @@
   <nav class="dots" id="dots" aria-label="슬라이드 이동"></nav>
   <div class="count" id="count">01 / 12</div>
   <div class="hint">← → / SPACE</div>
-  <div class="edit-hotzone" id="hotzone"></div>
-  <button class="edit-toggle" id="editToggle" title="편집 모드 (E)">EDIT · E</button>
 
   <script>
     /* ===========================================
@@ -2411,14 +2366,13 @@
       }
       bind() {
         addEventListener('keydown', e => {
-          if (document.body.classList.contains('editing')) return;
           if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); this.go(this.current + 1); }
           if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); this.go(this.current - 1); }
           if (e.key === 'Home') this.go(0);
           if (e.key === 'End') this.go(this.slides.length - 1);
         });
         addEventListener('wheel', e => {
-          if (this.lock || document.body.classList.contains('editing')) return;
+          if (this.lock) return;
           this.lock = true; setTimeout(() => this.lock = false, 800);
           this.go(this.current + (e.deltaY > 0 ? 1 : -1));
         }, { passive: true });
@@ -2452,7 +2406,6 @@
     // cards with data-goto jump to the slide whose data-title matches
     document.querySelectorAll('[data-goto]').forEach(el => {
       const jump = () => {
-        if (document.body.classList.contains('editing')) return;
         if (matchMedia('(hover: none), (pointer: coarse)').matches) return; // no jump on touch/mobile
         const i = deck.slides.findIndex(s => s.dataset.title === el.dataset.goto);
         if (i >= 0) deck.go(i);
@@ -2463,38 +2416,6 @@
       });
     });
 
-    /* ===========================================
-       INLINE EDITOR — E key or top-left hover; Ctrl/Cmd+S downloads the edited file
-       =========================================== */
-    const editor = {
-      isActive: false,
-      sel: '.slide h1,.slide h2,.slide p,.slide li,.slide .n,.slide .d,.slide .q,.slide .b,.slide .t,.slide .l,.slide .row span,.slide td,.slide .mx>div,.slide .meas>div,.slide .badge,.slide .pill,.slide .eyebrow,.slide .who span,.slide .term',
-      toggleEditMode() {
-        this.isActive = !this.isActive;
-        document.body.classList.toggle('editing', this.isActive);
-        document.getElementById('editToggle').classList.toggle('active', this.isActive);
-        document.querySelectorAll(this.sel).forEach(el => el.setAttribute('contenteditable', this.isActive ? 'true' : 'false'));
-      },
-      save() {
-        if (this.isActive) this.toggleEditMode();
-        document.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
-        document.querySelectorAll('.stars i,#land i,#dots button').forEach(el => el.remove());
-        const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-        a.download = 'ai-secretary-8bit.html'; a.click(); setTimeout(() => location.reload(), 300);
-      }
-    };
-    const hotzone = document.getElementById('hotzone'), editToggle = document.getElementById('editToggle'); let hideT = null;
-    editToggle.addEventListener('click', () => editor.toggleEditMode());
-    hotzone.addEventListener('click', () => editor.toggleEditMode());
-    hotzone.addEventListener('mouseenter', () => { clearTimeout(hideT); editToggle.classList.add('show'); });
-    hotzone.addEventListener('mouseleave', () => { hideT = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
-    editToggle.addEventListener('mouseenter', () => clearTimeout(hideT));
-    editToggle.addEventListener('mouseleave', () => { hideT = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
-    document.addEventListener('keydown', e => {
-      if ((e.key === 'e' || e.key === 'E') && !e.target.isContentEditable) editor.toggleEditMode();
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); editor.save(); }
-    });
   </script>
 </body>
 
