@@ -1629,6 +1629,31 @@
       position: relative
     }
 
+    .dots button::before {
+      content: attr(data-tip);
+      position: absolute;
+      right: calc(100% + 14px);
+      top: 50%;
+      transform: translate(6px, -50%);
+      white-space: nowrap;
+      background: var(--navy);
+      color: var(--yellow);
+      border: 2px solid var(--cyan);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, .35);
+      font: 700 15px/1 var(--mono);
+      letter-spacing: .06em;
+      padding: 8px 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s, transform .15s
+    }
+
+    .dots button:hover::before,
+    .dots button:focus-visible::before {
+      opacity: 1;
+      transform: translate(0, -50%)
+    }
+
     .dots button.on::after {
       content: '';
       position: absolute;
@@ -1735,7 +1760,7 @@
       </section>
 
       <!-- ========== 02 BEFORE ========== -->
-      <section class="slide s-pink" data-title="Before">
+      <section class="slide s-pink" data-title="기존 방식">
         <div class="wrap">
           <span class="pill reveal">01 · 기존 방식</span>
           <h2 class="h1 reveal d1">매일 아침 탭 4개를 열어서 확인했습니다</h2>
@@ -1757,7 +1782,7 @@
       </section>
 
       <!-- ========== 03 ARCHITECTURE ========== -->
-      <section class="slide s-dark" data-title="구성">
+      <section class="slide s-dark" data-title="브리핑 구성">
         <div class="stars" data-n="30"></div>
         <div class="crt"></div>
         <div class="wrap">
@@ -1813,7 +1838,7 @@
       </section>
 
       <!-- ========== 04 INTEGRATION TABLE ========== -->
-      <section class="slide s-lav" data-title="연동">
+      <section class="slide s-lav" data-title="MCP 연동">
         <div class="wrap">
           <span class="pill reveal">03 · 연동</span>
           <h2 class="h1 reveal d1">읽기는 자동, 쓰기는 사람이 확인하고 실행</h2>
@@ -1895,7 +1920,7 @@
       </section>
 
       <!-- ========== 06 BRIEFING DEMO ========== -->
-      <section class="slide s-dark" data-title="데모">
+      <section class="slide s-dark" data-title="출근 브리핑 화면">
         <div class="stars" data-n="20"></div>
         <div class="crt"></div>
         <div class="wrap">
@@ -1940,7 +1965,7 @@
       </section>
 
       <!-- ========== 07 4D OVERVIEW ========== -->
-      <section class="slide s-pink" data-title="원칙">
+      <section class="slide s-pink" data-title="원칙 네 가지">
         <div class="wrap">
           <span class="pill reveal">06 · 원칙</span>
           <h2 class="h1 reveal d1">만들면서 지킨 원칙 네 가지</h2>
@@ -2036,7 +2061,7 @@
       </section>
 
       <!-- ========== 09 DESCRIPTION ========== -->
-      <section class="slide s-lav" data-title="지시문">
+      <section class="slide s-lav" data-title="지시문 구성">
         <div class="wrap">
           <span class="pill reveal">원칙 02 · 구체적으로 지시</span>
           <h2 class="h1 reveal d1">/morning 지시문은 이렇게 나눠서 썼습니다</h2>
@@ -2076,7 +2101,7 @@
       </section>
 
       <!-- ========== 09b GUARDRAILS (rules · deny · hooks) ========== -->
-      <section class="slide s-dark" data-title="규칙">
+      <section class="slide s-dark" data-title="규칙 · 권한 · 훅">
         <div class="stars" data-n="20"></div>
         <div class="crt"></div>
         <div class="wrap">
@@ -2119,7 +2144,7 @@
       </section>
 
       <!-- ========== 09c AGENT TEAM ========== -->
-      <section class="slide s-cyan" data-title="에이전트">
+      <section class="slide s-cyan" data-title="에이전트 팀 · 모델">
         <div class="wrap">
           <span class="pill reveal">작업 · 에이전트 팀</span>
           <h2 class="h1 reveal d1">코드는 에이전트 셋이 나눠서, 모델도 따로</h2>
@@ -2199,7 +2224,7 @@
       </section>
 
       <!-- ========== 09e BROWSER QA RESULT ========== -->
-      <section class="slide s-dark" data-title="QA 결과">
+      <section class="slide s-dark" data-title="QA 실제 결과">
         <div class="stars" data-n="20"></div>
         <div class="crt"></div>
         <div class="wrap">
@@ -2284,7 +2309,7 @@
       </section>
 
       <!-- ========== 11 NUMBERS ========== -->
-      <section class="slide s-dark" data-title="효과">
+      <section class="slide s-dark" data-title="숫자로 본 효과">
         <div class="stars" data-n="20"></div>
         <div class="crt"></div>
         <div class="wrap">
@@ -2334,7 +2359,7 @@
       </section>
 
       <!-- ========== 12 ROLLOUT + CLOSE ========== -->
-      <section class="slide s-dark close" data-title="확산">
+      <section class="slide s-dark close" data-title="다른 직군으로">
         <div class="stars" data-n="60"></div>
         <div class="crt"></div>
         <div class="land" id="land"></div>
@@ -2418,7 +2443,7 @@
       buildDots() {
         const nav = document.getElementById('dots');
         this.dots = this.slides.map((s, i) => {
-          const b = document.createElement('button'); b.setAttribute('aria-label', `${i + 1}. ${s.dataset.title}`);
+          const b = document.createElement('button'); b.setAttribute('aria-label', `${i + 1}. ${s.dataset.title}`); b.dataset.tip = `${String(i + 1).padStart(2, '0')} · ${s.dataset.title}`;
           b.onclick = () => this.go(i); nav.appendChild(b); return b;
         });
       }
